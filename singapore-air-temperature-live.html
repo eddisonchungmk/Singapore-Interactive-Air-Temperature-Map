@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Singapore Air Temperature</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<style>
+/* Layout: synoptic chart. Wide island map with an interpolated heat field on the left, ranked station ledger on the right; stacks on phones. */
+:root {
+  --paper: #eef3f3;
+  --surface: #ffffff;
+  --sea: #d9e5e7;
+  --ink: #142629;
+  --muted: #566c70;
+  --line: #c4d3d5;
+  --accent: #0d6b75;
+  --land-edge: #35545a;
+  --live: #1c7a4d;
+  --warn: #8f5a00;
+  --bad: #b3341f;
+  --font-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0a1417;
+    --surface: #112126;
+    --sea: #0d1c21;
+    --ink: #e2ebeb;
+    --muted: #8ea4a7;
+    --line: #233c44;
+    --accent: #5fc4cd;
+    --land-edge: #9fbcc0;
+    --live: #5fd39a;
+    --warn: #f0b64a;
+    --bad: #f08a72;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0a1417;
+  --surface: #112126;
+  --sea: #0d1c21;
+  --ink: #e2ebeb;
+  --muted: #8ea4a7;
+  --line: #233c44;
+  --accent: #5fc4cd;
+  --land-edge: #9fbcc0;
+  --live: #5fd39a;
+  --warn: #f0b64a;
+  --bad: #f08a72;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-block: 28px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 22px;
+}
+
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 32px; }
+.eyebrow {
+  font-family: var(--font-data);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+.stats { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 0; }
+.stats div { display: grid; gap: 0; }
+.stats dt { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.stats dd { margin: 0; font-family: var(--font-data); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stats dd small { font-family: var(--font-body); font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+.map-card {
+  background: var(--sea);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.map-scroll { overflow-x: auto; }
+.map-stage { position: relative; min-width: 640px; aspect-ratio: 920 / 620; }
+.map-stage canvas, .map-stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.map-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 10px 20px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+.readout { font-family: var(--font-data); font-size: 13px; font-variant-numeric: tabular-nums; min-height: 1.5em; margin: 0; }
+.readout .tag { color: var(--muted); }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; user-select: none; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+
+.legend { display: grid; gap: 4px; width: min(300px, 100%); }
+.legend-bar { height: 10px; border-radius: 2px; }
+.legend-ticks { display: flex; justify-content: space-between; font-family: var(--font-data); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* SVG map */
+.land { fill: none; stroke: var(--land-edge); stroke-width: 1.2; }
+.land.flat { fill: var(--surface); }
+.sea-label { fill: var(--muted); font-family: var(--font-data); font-size: 11px; letter-spacing: .25em; text-transform: uppercase; opacity: .8; }
+.stn { cursor: pointer; outline: none; }
+.stn .pill { fill: var(--surface); stroke: var(--line); stroke-width: 1; transition: stroke .15s; }
+.stn .val { fill: var(--ink); font-family: var(--font-data); font-size: 14px; font-weight: 500; }
+.stn .name { fill: var(--ink); font-family: var(--font-body); font-size: 12px; font-weight: 600; paint-order: stroke; stroke: var(--sea); stroke-width: 3px; stroke-linejoin: round; }
+.stn .pin { stroke: var(--surface); stroke-width: 1.5; }
+.stn:hover .pill, .stn:focus-visible .pill { stroke: var(--ink); }
+.stn.on .pill { stroke: var(--accent); stroke-width: 2.5; }
+.town { cursor: pointer; outline: none; }
+.town .mark { fill: var(--ink); stroke: var(--surface); stroke-width: 1.5; }
+.town .tname { fill: var(--ink); font-family: var(--font-body); font-size: 11px; font-weight: 500; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; opacity: .9; }
+.town:hover .mark, .town:focus-visible .mark { fill: var(--accent); }
+.town.on .mark { fill: var(--accent); stroke-width: 2; }
+.town.on .tname { font-weight: 700; opacity: 1; }
+.hide-towns .town { display: none; }
+
+/* Ledger */
+.ledger { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.ledger h2 {
+  font-family: var(--font-display); font-weight: 500; font-size: 18px; margin: 0;
+  padding: 14px 16px 10px; border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+}
+.ledger h2 span { font-family: var(--font-data); font-size: 12px; color: var(--muted); font-weight: 400; }
+.ledger ol { list-style: none; margin: 0; padding: 4px 0; }
+.tabs { display: flex; gap: 4px; padding: 10px 12px 0; }
+.tab {
+  flex: 1;
+  font: inherit; font-size: 13px; font-weight: 500;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--surface); background: var(--ink); border-color: var(--ink); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.est { font-size: 11px; color: var(--muted); font-family: var(--font-body); font-weight: 400; margin-right: 4px; }
+.toggles { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "name val" "bar bar";
+  gap: 5px 12px;
+  padding: 9px 16px;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.row:hover { background: var(--paper); }
+.row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.row.on { border-left-color: var(--accent); background: var(--paper); }
+.row-name { grid-area: name; font-weight: 500; font-size: 14px; line-height: 1.3; }
+.row-name small { display: block; font-family: var(--font-data); font-size: 11px; color: var(--muted); font-weight: 400; }
+.row-val { grid-area: val; font-family: var(--font-data); font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; align-self: center; }
+.row-track { grid-area: bar; height: 6px; background: var(--paper); border-radius: 3px; overflow: hidden; }
+.row.on .row-track, .row:hover .row-track { background: var(--line); }
+.row-fill { height: 100%; border-radius: 3px; }
+
+.note { font-size: 13px; color: var(--muted); max-width: 72ch; margin: 0; }
+.note strong { color: var(--ink); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Live feed status */
+.title-block { flex: 1 1 420px; min-width: 0; }
+.status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 9px 2px 8px;
+  border: 1px solid var(--tone, var(--line));
+  border-radius: 999px;
+  color: var(--tone, var(--muted));
+  font-family: var(--font-data); font-size: 12px; font-weight: 500;
+  white-space: nowrap;
+}
+.badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tone, var(--muted)); }
+.status[data-state="live"] { --tone: var(--live); }
+.status[data-state="delayed"], .status[data-state="snapshot"] { --tone: var(--warn); }
+.status[data-state="lost"] { --tone: var(--bad); }
+.refresh {
+  font: inherit; font-size: 12px; font-weight: 500;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.refresh:hover { border-color: var(--ink); }
+.refresh:disabled { opacity: .5; cursor: default; }
+.refresh:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Town names that would collide stay hidden until the town is hovered or picked */
+.town.quiet .tname { display: none; }
+.town.quiet:hover .tname, .town.quiet:focus-visible .tname, .town.quiet.on .tname { display: block; }
+
+/* Notes sit under the map; on phones they follow the list */
+.grid { grid-template-areas: "map list" "notes list"; grid-template-rows: auto 1fr; }
+.map-card { grid-area: map; min-width: 0; }
+.ledger { grid-area: list; }
+.notes { grid-area: notes; display: grid; gap: 12px; align-content: start; }
+@media (max-width: 900px) {
+  .grid { grid-template-areas: "map" "list" "notes"; grid-template-rows: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <p class="eyebrow" id="eyebrow">Dry-bulb air temperature</p>
+      <h1>Singapore Air Temperature</h1>
+      <div class="status" id="status" data-state="connecting">
+        <span class="badge" id="statusLabel" role="status">Connecting</span>
+        <span id="statusDetail"></span>
+        <button class="refresh" id="refresh" type="button">Refresh now</button>
+      </div>
+    </div>
+    <dl class="stats" id="stats"></dl>
+  </header>
+
+  <div class="grid">
+    <section class="map-card" aria-label="Temperature map of Singapore">
+      <div class="map-scroll">
+        <div class="map-stage" id="stage">
+          <canvas id="heat" aria-hidden="true"></canvas>
+          <svg id="map" viewBox="0 0 920 620" role="img" aria-label="Map of Singapore with temperatures at NEA weather stations"></svg>
+        </div>
+      </div>
+      <div class="map-bar">
+        <p class="readout" id="readout"><span class="tag">Hover over the island for an estimate, or pick a station or town.</span></p>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="surface" checked> Heat surface</label>
+          <label class="toggle"><input type="checkbox" id="towns" checked> HDB towns</label>
+        </div>
+        <div class="legend" id="legend">
+          <div class="legend-bar" id="legendBar"></div>
+          <div class="legend-ticks" id="legendTicks"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="ledger">
+      <div class="tabs" role="tablist" aria-label="List to show">
+        <button class="tab" role="tab" id="tab-stations" aria-selected="true">Weather stations</button>
+        <button class="tab" role="tab" id="tab-towns" aria-selected="false">HDB towns</button>
+      </div>
+      <h2 id="listTitle">Stations, warmest first <span>°C</span></h2>
+      <ol id="list"></ol>
+    </aside>
+
+    <div class="notes">
+      <p class="note"><strong>Where the numbers come from.</strong> Station readings come from the National Environment Agency's air temperature feed on data.gov.sg (1-minute dry-bulb readings). This page checks for a new reading every minute while it is open. NEA's feed can lag, so the status line shows the time of the reading itself. The colours between stations are an inverse-distance estimate, not a measurement. The colour scale resets to fit each reading, so compare colours within one map, not between times of day.</p>
+      <p class="note"><strong>HDB towns.</strong> Town points come from two data.gov.sg datasets: HDB Property Information (each block's town and flat count) and HDB Existing Building (each block's footprint). Blocks were matched between them by street and block number, and each point is the flat-weighted centre of that town's residential blocks. Town temperatures are estimated from the surrounding stations; no station sits in most towns.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Live feed settings
+// ---------------------------------------------------------------------------
+// NEA's air temperature feed on data.gov.sg. It works without an API key at this
+// polling rate. The second URL is the older version of the same feed, used only
+// if the first one fails.
+const FEEDS = [
+  { url: "https://api-open.data.gov.sg/v2/real-time/api/air-temperature", parse: parseV2 },
+  { url: "https://api.data.gov.sg/v1/environment/air-temperature", parse: parseV1 }
+];
+const POLL_MS = 60 * 1000;       // check for a new reading once a minute
+const TIMEOUT_MS = 10 * 1000;    // give up on a request after 10 seconds
+const STALE_MS = 15 * 60 * 1000; // call a reading "delayed" after 15 minutes
+const VALID_MIN = 15, VALID_MAX = 45; // ignore faulty sensor values outside this range (°C)
+
+// Shown only until the first live reading arrives, or if the feed can't be reached.
+const SNAPSHOT_TIME = new Date("2026-10-30T23:54:00+08:00");
+const SNAPSHOT_STATIONS = [
+  { id: "S60",  name: "Artillery Avenue (Sentosa)",       short: "Sentosa",       lat: 1.2504, lon: 103.8275, t: 29.4, dx: 0,   dy: 1 },
+  { id: "S24",  name: "Changi Meteorological Station",     short: "Changi",        lat: 1.3678, lon: 103.9823, t: 28.4, dx: 0,   dy: 1 },
+  { id: "S106", name: "Jalan Noordin (Pulau Ubin)",        short: "Pulau Ubin",    lat: 1.4168, lon: 103.9673, t: 26.5, dx: 0,   dy: -1 },
+  { id: "S44",  name: "Nanyang Avenue",                    short: "Nanyang Ave",   lat: 1.3458, lon: 103.6817, t: 28.3, dx: 0,   dy: 1 },
+  { id: "S116", name: "Pasir Panjang Terminal",            short: "Pasir Panjang", lat: 1.2824, lon: 103.7545, t: 29.8, dx: 0,   dy: 1 },
+  { id: "S111", name: "Scotts Road",                       short: "Scotts Rd",     lat: 1.3106, lon: 103.8365, t: 28.9, dx: 0,   dy: 1 },
+  { id: "S80",  name: "Sembawang Meteorological Station",  short: "Sembawang",     lat: 1.4247, lon: 103.8201, t: 26.7, dx: 0,   dy: 1 },
+  { id: "S23",  name: "Tengah Meteorological Station",     short: "Tengah",        lat: 1.3858, lon: 103.7119, t: 27.3, dx: 0,   dy: 1 },
+  { id: "S115", name: "Tuas South Avenue 3",               short: "Tuas South",    lat: 1.2938, lon: 103.6184, t: 29.5, dx: 0,   dy: -1 }
+];
+
+// Short map labels. The feed's station names change over time, and it names S23 "S23".
+const SHORT = {
+  S06: "Paya Lebar", S23: "Tengah", S24: "Changi", S43: "Kim Chuan", S44: "Nanyang Ave",
+  S50: "Clementi", S60: "Sentosa", S80: "Sembawang", S102: "Semakau", S104: "Woodlands",
+  S106: "Pulau Ubin", S107: "East Coast", S109: "Ang Mo Kio", S111: "Scotts Rd",
+  S115: "Tuas South", S116: "Pasir Panjang", S117: "Banyan Rd"
+};
+
+// HDB town centres derived from data.gov.sg; pos = label side
+const TOWNS = [
+  { id: "AMK", name: "Ang Mo Kio",      lon: 103.8473, lat: 1.3707, blocks: 392, units: 52139 },
+  { id: "BD",  name: "Bedok",           lon: 103.9286, lat: 1.3292, blocks: 530, units: 64414 },
+  { id: "BH",  name: "Bishan",          lon: 103.8462, lat: 1.3534, blocks: 238, units: 21650 },
+  { id: "BB",  name: "Bukit Batok",     lon: 103.7482, lat: 1.3525, blocks: 444, units: 48116, pos: "l" },
+  { id: "BM",  name: "Bukit Merah",     lon: 103.8221, lat: 1.2817, blocks: 426, units: 53070 },
+  { id: "BP",  name: "Bukit Panjang",   lon: 103.7677, lat: 1.3823, blocks: 346, units: 37096 },
+  { id: "BT",  name: "Bukit Timah",     lon: 103.7735, lat: 1.3386, blocks: 27,  units: 2554 },
+  { id: "CT",  name: "Central Area",    lon: 103.8465, lat: 1.2919, blocks: 79,  units: 11997 },
+  { id: "CCK", name: "Choa Chu Kang",   lon: 103.7461, lat: 1.3857, blocks: 529, units: 50171, pos: "l" },
+  { id: "CL",  name: "Clementi",        lon: 103.7662, lat: 1.3133, blocks: 206, units: 28709 },
+  { id: "GL",  name: "Geylang",         lon: 103.8912, lat: 1.3212, blocks: 310, units: 36014 },
+  { id: "HG",  name: "Hougang",         lon: 103.8884, lat: 1.3708, blocks: 610, units: 59582 },
+  { id: "JE",  name: "Jurong East",     lon: 103.7395, lat: 1.3371, blocks: 234, units: 24691 },
+  { id: "JW",  name: "Jurong West",     lon: 103.7081, lat: 1.3432, blocks: 747, units: 77241 },
+  { id: "KWN", name: "Kallang/Whampoa", lon: 103.8630, lat: 1.3175, blocks: 315, units: 43231, pos: "b" },
+  { id: "MP",  name: "Marine Parade",   lon: 103.9130, lat: 1.3042, blocks: 59,  units: 7854 },
+  { id: "PRC", name: "Pasir Ris",       lon: 103.9508, lat: 1.3722, blocks: 441, units: 30924, pos: "l" },
+  { id: "PG",  name: "Punggol",         lon: 103.9067, lat: 1.4042, blocks: 557, units: 63264 },
+  { id: "QT",  name: "Queenstown",      lon: 103.7975, lat: 1.3025, blocks: 242, units: 34920 },
+  { id: "SB",  name: "Sembawang",       lon: 103.8221, lat: 1.4490, blocks: 281, units: 32523, pos: "t" },
+  { id: "SK",  name: "Sengkang",        lon: 103.8917, lat: 1.3911, blocks: 669, units: 76265 },
+  { id: "SGN", name: "Serangoon",       lon: 103.8720, lat: 1.3604, blocks: 232, units: 21631 },
+  { id: "TAP", name: "Tampines",        lon: 103.9451, lat: 1.3539, blocks: 924, units: 87410 },
+  { id: "TG",  name: "Tengah",          lon: 103.7346, lat: 1.3596, blocks: 145, units: 16318 },
+  { id: "TP",  name: "Toa Payoh",       lon: 103.8569, lat: 1.3367, blocks: 386, units: 48943 },
+  { id: "WL",  name: "Woodlands",       lon: 103.7903, lat: 1.4381, blocks: 741, units: 76343, pos: "l" },
+  { id: "YS",  name: "Yishun",          lon: 103.8395, lat: 1.4265, blocks: 707, units: 72086 }
+];
+
+// Simplified coastlines, [lon, lat]
+const LAND = [
+  [[103.605,1.312],[103.618,1.335],[103.640,1.348],[103.660,1.376],[103.680,1.405],[103.700,1.430],[103.725,1.450],
+   [103.760,1.448],[103.772,1.440],[103.795,1.452],[103.820,1.462],[103.840,1.468],[103.860,1.460],[103.875,1.437],
+   [103.895,1.422],[103.912,1.410],[103.930,1.396],[103.958,1.386],[103.985,1.390],[104.010,1.377],[104.032,1.356],
+   [104.022,1.330],[103.992,1.316],[103.960,1.310],[103.930,1.301],[103.900,1.296],[103.876,1.286],[103.862,1.272],
+   [103.845,1.268],[103.830,1.271],[103.810,1.268],[103.790,1.275],[103.765,1.282],[103.745,1.288],[103.720,1.291],
+   [103.700,1.296],[103.680,1.292],[103.660,1.276],[103.640,1.262],[103.615,1.268],[103.600,1.290]],
+  [[103.808,1.256],[103.835,1.259],[103.847,1.250],[103.832,1.242],[103.812,1.245]],
+  [[103.668,1.268],[103.690,1.282],[103.714,1.276],[103.722,1.256],[103.702,1.240],[103.676,1.245]],
+  [[103.936,1.410],[103.960,1.421],[103.990,1.416],[104.002,1.405],[103.976,1.399],[103.946,1.401]],
+  [[103.755,1.216],[103.770,1.214],[103.778,1.196],[103.770,1.183],[103.757,1.190]]
+];
+
+// ---------------------------------------------------------------------------
+// Map projection and colour scale
+// ---------------------------------------------------------------------------
+const W = 920, H = 620, PAD = 28;
+const LON0 = 103.590, LON1 = 104.045, LAT0 = 1.175, LAT1 = 1.478;
+const KX = Math.cos(1.35 * Math.PI / 180);
+const K = Math.min((W - 2 * PAD) / ((LON1 - LON0) * KX), (H - 2 * PAD) / (LAT1 - LAT0));
+const OX = (W - (LON1 - LON0) * KX * K) / 2, OY = (H - (LAT1 - LAT0) * K) / 2;
+const proj = (lon, lat) => [OX + (lon - LON0) * KX * K, OY + (LAT1 - lat) * K];
+
+let STATIONS = [];          // the readings on screen
+let TMIN = 26, TMAX = 30;   // colour scale limits, reset for each reading
+const STOPS = [[52, 132, 178], [86, 172, 160], [226, 196, 88], [234, 138, 60], [206, 70, 44]];
+
+function colour(t) {
+  const f = Math.max(0, Math.min(1, (t - TMIN) / (TMAX - TMIN))) * (STOPS.length - 1);
+  const i = Math.min(Math.floor(f), STOPS.length - 2);
+  return STOPS[i].map((v, j) => Math.round(v + (STOPS[i + 1][j] - v) * (f - i)));
+}
+const css = rgb => `rgb(${rgb.join(",")})`;
+
+// Whole degrees that fit the reading, at least 4 °C wide so small spreads don't look dramatic.
+function setScale(values) {
+  let lo = Math.floor(Math.min(...values)), hi = Math.ceil(Math.max(...values));
+  if (hi - lo < 4) {
+    const extra = 4 - (hi - lo);
+    lo -= Math.floor(extra / 2);
+    hi += Math.ceil(extra / 2);
+  }
+  if (hi - lo > 6 && (hi - lo) % 2) hi += 1;
+  TMIN = lo; TMAX = hi;
+}
+
+function idw(x, y) {
+  let num = 0, den = 0;
+  for (const s of STATIONS) {
+    const d2 = (x - s.x) ** 2 + (y - s.y) ** 2;
+    if (d2 < 1) return s.t;
+    const w = 1 / d2;
+    num += w * s.t; den += w;
+  }
+  return num / den;
+}
+
+TOWNS.forEach(t => { [t.x, t.y] = proj(t.lon, t.lat); t.t = 0; });
+const landD = LAND.map(poly => "M" + poly.map(p => proj(p[0], p[1]).map(n => n.toFixed(1)).join(",")).join("L") + "Z").join("");
+
+// ---------------------------------------------------------------------------
+// Reading the feed
+// ---------------------------------------------------------------------------
+function parseV2(json) {
+  const d = json.data;
+  const latest = d.readings.reduce((a, b) => new Date(b.timestamp) > new Date(a.timestamp) ? b : a);
+  return joinReadings(d.stations, latest.data.map(r => ({ id: r.stationId, value: r.value })), latest.timestamp);
+}
+
+function parseV1(json) {
+  const latest = json.items[json.items.length - 1];
+  return joinReadings(json.metadata.stations, latest.readings.map(r => ({ id: r.station_id, value: r.value })), latest.timestamp);
+}
+
+// Matches each reading to its station and drops anything unusable.
+function joinReadings(stations, readings, timestamp) {
+  const meta = new Map(stations.map(s => [s.id, s]));
+  const list = [];
+  for (const r of readings) {
+    const s = meta.get(r.id);
+    if (!s) continue;
+    const t = Number(r.value), lat = Number(s.location?.latitude), lon = Number(s.location?.longitude);
+    const inMap = lon >= LON0 && lon <= LON1 && lat >= LAT0 && lat <= LAT1;
+    if (!(t >= VALID_MIN && t <= VALID_MAX) || !inMap) continue;
+    const name = s.name && s.name !== s.id ? s.name : (SHORT[s.id] || s.id);
+    list.push({ id: s.id, name, short: SHORT[s.id] || name, lat, lon, t });
+  }
+  const time = new Date(timestamp);
+  if (list.length < 3 || isNaN(time)) throw new Error("The feed had too few usable readings");
+  return { time, stations: list };
+}
+
+async function fetchFeed(feed) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(feed.url, { signal: ctrl.signal, cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return feed.parse(await res.json());
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+let readingTime = SNAPSHOT_TIME;
+let isLive = false;       // true once a real reading has arrived
+let feedFailed = false;   // true if the last check failed
+let inFlight = false;
+let lastAttempt = 0;
+let feedOrder = [...FEEDS];
+
+async function refresh() {
+  if (inFlight) return;
+  inFlight = true;
+  refreshBtn.disabled = true;
+  lastAttempt = Date.now();
+  let result = null;
+  for (const feed of feedOrder) {
+    try {
+      result = await fetchFeed(feed);
+      feedOrder = [feed, ...feedOrder.filter(f => f !== feed)]; // try this one first next time
+      break;
+    } catch (err) {
+      console.warn("NEA feed failed:", feed.url, err.message);
+    }
+  }
+  inFlight = false;
+  refreshBtn.disabled = false;
+  feedFailed = !result;
+  if (result && (!isLive || result.time > readingTime)) {
+    isLive = true;
+    applyReadings(result);
+  }
+  updateStatus();
+}
+
+// ---------------------------------------------------------------------------
+// Drawing
+// ---------------------------------------------------------------------------
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const SGT = { timeZone: "Asia/Singapore" };
+const clockFmt = new Intl.DateTimeFormat("en-SG", { ...SGT, hour: "numeric", minute: "2-digit", hour12: true });
+const dateFmt = new Intl.DateTimeFormat("en-SG", { ...SGT, weekday: "short", day: "numeric", month: "short", year: "numeric" });
+const clockOf = d => clockFmt.format(d);
+const dateOf = d => dateFmt.format(d);
+
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("map");
+const el = (tag, attrs, parent) => {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+const landPath = el("path", { d: landD, class: "land" }, svg);
+const SEA = [
+  { x: 110, y: 70, text: "Strait of Johor" },
+  { x: 470, y: H - PAD + 6, text: "Singapore Strait" }
+];
+for (const s of SEA) el("text", { x: s.x, y: s.y, class: "sea-label" }, svg).textContent = s.text;
+const seaBoxes = SEA.map(s => ({ x: s.x, y: s.y - 11, w: s.text.length * 9.5, h: 14 }));
+const townLayer = el("g", {}, svg);
+const stationLayer = el("g", {}, svg);
+
+const marks = {};
+let selected = null;
+
+for (const t of TOWNS) {
+  const g = el("g", { class: "town", tabindex: 0, role: "button" }, townLayer);
+  el("rect", { x: t.x - 3.5, y: t.y - 3.5, width: 7, height: 7, transform: `rotate(45 ${t.x} ${t.y})`, class: "mark" }, g);
+  const pos = t.pos || "r";
+  const lx = pos === "r" ? t.x + 7 : pos === "l" ? t.x - 7 : t.x + (pos === "b" ? 4 : 0);
+  const ly = pos === "t" ? t.y - 8 : pos === "b" ? t.y + 16 : t.y + 4;
+  const anchor = pos === "r" ? "start" : pos === "l" ? "end" : pos === "b" ? "start" : "middle";
+  el("text", { x: lx, y: ly, "text-anchor": anchor, class: "tname" }, g).textContent = t.name;
+  const nameW = t.name.length * 5.8;
+  t.box = { x: anchor === "start" ? lx : anchor === "end" ? lx - nameW : lx - nameW / 2, y: ly - 10, w: nameW, h: 13 };
+  g.addEventListener("click", () => select(t.id));
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(t.id); } });
+  g.addEventListener("mouseenter", () => showTown(t));
+  g.addEventListener("mouseleave", restoreReadout);
+  marks[t.id] = g;
+}
+
+// Picks a side of each pin for its label so labels overlap as little as possible, then
+// hides any town name that a station label covers or a larger town has already claimed.
+function layoutLabels() {
+  const BLOCK_H = 42;
+  const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const taken = [...seaBoxes, ...STATIONS.map(s => ({ x: s.x - 6, y: s.y - 6, w: 12, h: 12 }))];
+  const townBits = TOWNS.flatMap(t => [t.box, { x: t.x - 4, y: t.y - 4, w: 8, h: 8 }]);
+  for (const s of [...STATIONS].sort((a, b) => a.y - b.y)) {
+    const w = Math.max(72, s.short.length * 6.8);
+    const options = [
+      [s.x - w / 2, s.y - BLOCK_H - 8],
+      [s.x - w / 2, s.y + 8],
+      [s.x + 9, s.y - BLOCK_H / 2],
+      [s.x - w - 9, s.y - BLOCK_H / 2]
+    ];
+    let best = null, fewest = Infinity;
+    for (const [x, y] of options) {
+      if (x < 4 || y < 4 || x + w > W - 4 || y + BLOCK_H > H - 4) continue;
+      const box = { x, y, w, h: BLOCK_H };
+      const clashes = 10 * taken.filter(b => hits(box, b)).length + townBits.filter(b => hits(box, b)).length;
+      if (clashes < fewest) { fewest = clashes; best = box; }
+    }
+    best = best || { x: s.x - w / 2, y: s.y + 8, w, h: BLOCK_H };
+    s.label = best;
+    taken.push(best);
+  }
+  for (const t of [...TOWNS].sort((a, b) => b.units - a.units)) {
+    const clash = taken.some(b => hits(t.box, b));
+    marks[t.id].classList.toggle("quiet", clash);
+    if (!clash) taken.push(t.box);
+  }
+}
+
+function renderStations() {
+  const focused = document.activeElement?.dataset?.stn;
+  for (const k of Object.keys(marks)) if (marks[k].dataset.stn) delete marks[k];
+  stationLayer.replaceChildren();
+  layoutLabels();
+  for (const s of STATIONS) {
+    const g = el("g", { class: "stn", tabindex: 0, role: "button", "data-stn": s.id, "aria-label": `${s.name}, ${s.t.toFixed(1)} degrees Celsius` }, stationLayer);
+    const pw = 72, ph = 26, b = s.label;
+    const px = b.x + (b.w - pw) / 2, py = b.y;
+    el("circle", { cx: s.x, cy: s.y, r: 4, class: "pin", fill: "currentColor", style: "color:var(--ink)" }, g);
+    el("rect", { x: px, y: py, width: pw, height: ph, rx: 13, class: "pill" }, g);
+    el("circle", { cx: px + 14, cy: py + ph / 2, r: 5, fill: css(colour(s.t)) }, g);
+    el("text", { x: px + 24, y: py + ph / 2 + 5, class: "val" }, g).textContent = s.t.toFixed(1) + "°";
+    el("text", { x: b.x + b.w / 2, y: py + ph + 14, "text-anchor": "middle", class: "name" }, g).textContent = s.short;
+    g.addEventListener("click", () => select(s.id));
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(s.id); } });
+    g.addEventListener("mouseenter", () => showStation(s));
+    g.addEventListener("mouseleave", restoreReadout);
+    marks[s.id] = g;
+  }
+  if (focused) marks[focused]?.focus();
+}
+
+function renderStats() {
+  const top = sorted[0], low = sorted[sorted.length - 1];
+  const mean = STATIONS.reduce((a, s) => a + s.t, 0) / STATIONS.length;
+  document.getElementById("stats").innerHTML = `
+    <div><dt>Warmest</dt><dd>${top.t.toFixed(1)}°<small>${esc(top.short)}</small></dd></div>
+    <div><dt>Coolest</dt><dd>${low.t.toFixed(1)}°<small>${esc(low.short)}</small></dd></div>
+    <div><dt>Station mean</dt><dd>${mean.toFixed(1)}°</dd></div>
+    <div><dt>Spread</dt><dd>${(top.t - low.t).toFixed(1)}°</dd></div>`;
+}
+
+function renderLegend() {
+  document.getElementById("legendBar").style.background =
+    `linear-gradient(to right, ${STOPS.map((c, i) => `${css(c)} ${i / (STOPS.length - 1) * 100}%`).join(",")})`;
+  const step = TMAX - TMIN <= 6 ? 1 : 2;
+  const ticks = [];
+  for (let t = TMIN; t <= TMAX; t += step) ticks.push(t);
+  document.getElementById("legendTicks").innerHTML =
+    ticks.map((t, i) => `<span>${t}${i === ticks.length - 1 ? " °C" : "°"}</span>`).join("");
+  document.getElementById("legend").setAttribute("aria-label", `Colour scale from ${TMIN} to ${TMAX} °C`);
+}
+
+// Ledger
+const list = document.getElementById("list");
+const listTitle = document.getElementById("listTitle");
+const tabs = { stations: document.getElementById("tab-stations"), towns: document.getElementById("tab-towns") };
+let sorted = [], sortedTowns = [], rows = {}, listMode = "stations";
+
+function renderList() {
+  const focusId = document.activeElement?.id;
+  for (const k in tabs) tabs[k].setAttribute("aria-selected", String(k === listMode));
+  listTitle.innerHTML = listMode === "stations"
+    ? `Stations, warmest first <span>°C</span>`
+    : `HDB towns, warmest first <span>est. °C</span>`;
+  list.innerHTML = "";
+  rows = {};
+  for (const s of listMode === "stations" ? sorted : sortedTowns) {
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.className = "row" + (s.id === selected ? " on" : "");
+    b.id = "row-" + s.id;
+    const sub = listMode === "stations" ? s.id : `${s.blocks} blocks · ${s.units.toLocaleString("en-SG")} flats`;
+    b.innerHTML = `<span class="row-name">${esc(s.name)}<small>${esc(sub)}</small></span>
+      <span class="row-val">${listMode === "towns" ? '<span class="est">≈</span>' : ""}${s.t.toFixed(1)}</span>
+      <span class="row-track"><span class="row-fill" style="display:block;width:${((s.t - TMIN) / (TMAX - TMIN) * 100).toFixed(1)}%;background:${css(colour(s.t))}"></span></span>`;
+    b.addEventListener("click", () => select(s.id));
+    li.appendChild(b); list.appendChild(li);
+    rows[s.id] = b;
+  }
+  if (focusId) document.getElementById(focusId)?.focus();
+}
+tabs.stations.addEventListener("click", () => { listMode = "stations"; renderList(); });
+tabs.towns.addEventListener("click", () => { listMode = "towns"; renderList(); });
+
+// Readout + selection
+const readout = document.getElementById("readout");
+function showStation(s) {
+  readout.innerHTML = `${s.id} · ${esc(s.name)} · <strong>${s.t.toFixed(1)} °C</strong> <span class="tag">measured at ${clockOf(readingTime)} SGT</span>`;
+}
+function nearestStation(x, y) {
+  return [...STATIONS].sort((a, b) => ((a.x - x) ** 2 + (a.y - y) ** 2) - ((b.x - x) ** 2 + (b.y - y) ** 2))[0];
+}
+function showTown(t) {
+  readout.innerHTML = `${esc(t.name)} · <strong>≈ ${t.t.toFixed(1)} °C</strong> <span class="tag">estimated · ${t.units.toLocaleString("en-SG")} flats · nearest station ${esc(nearestStation(t.x, t.y).short)}</span>`;
+}
+function restoreReadout() {
+  const s = STATIONS.find(x => x.id === selected);
+  const t = TOWNS.find(x => x.id === selected);
+  if (s) showStation(s);
+  else if (t) showTown(t);
+  else readout.innerHTML = `<span class="tag">Hover over the island for an estimate, or pick a station or town.</span>`;
+}
+function select(id) {
+  selected = selected === id ? null : id;
+  if (TOWNS.some(t => t.id === selected) && svg.classList.contains("hide-towns")) {
+    townsBox.checked = true;
+    svg.classList.remove("hide-towns");
+  }
+  for (const k in marks) marks[k].classList.toggle("on", k === selected);
+  for (const k in rows) rows[k].classList.toggle("on", k === selected);
+  if (selected) marks[selected].parentNode.appendChild(marks[selected]);
+  restoreReadout();
+}
+const townsBox = document.getElementById("towns");
+townsBox.addEventListener("change", () => svg.classList.toggle("hide-towns", !townsBox.checked));
+
+svg.addEventListener("mousemove", e => {
+  if (e.target.closest(".stn, .town")) return;
+  const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse());
+  let onLand = false;
+  try { onLand = landPath.isPointInFill(new DOMPoint(pt.x, pt.y)); } catch (_) {}
+  if (!onLand) { restoreReadout(); return; }
+  const near = nearestStation(pt.x, pt.y);
+  readout.innerHTML = `Estimated <strong>${idw(pt.x, pt.y).toFixed(1)} °C</strong> <span class="tag">here · nearest station ${esc(near.short)} ${near.t.toFixed(1)}°</span>`;
+});
+svg.addEventListener("mouseleave", restoreReadout);
+
+// Heat surface
+const canvas = document.getElementById("heat");
+const stage = document.getElementById("stage");
+const surfaceBox = document.getElementById("surface");
+function draw() {
+  const r = stage.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(r.width * dpr);
+  canvas.height = Math.round(r.height * dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  landPath.classList.toggle("flat", !surfaceBox.checked);
+  if (!surfaceBox.checked) return;
+  // Paint one small image, then scale it up smoothly and clip it to the coastline.
+  const CELL = 3;
+  const off = document.createElement("canvas");
+  off.width = Math.ceil(W / CELL);
+  off.height = Math.ceil(H / CELL);
+  const offCtx = off.getContext("2d");
+  const img = offCtx.createImageData(off.width, off.height);
+  let i = 0;
+  for (let y = 0; y < off.height; y++) {
+    for (let x = 0; x < off.width; x++) {
+      const [r, g, b] = colour(idw((x + 0.5) * CELL, (y + 0.5) * CELL));
+      img.data[i++] = r; img.data[i++] = g; img.data[i++] = b; img.data[i++] = 255;
+    }
+  }
+  offCtx.putImageData(img, 0, 0);
+  ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+  ctx.save();
+  ctx.clip(new Path2D(landD));
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(off, 0, 0, off.width * CELL, off.height * CELL);
+  ctx.restore();
+}
+surfaceBox.addEventListener("change", draw);
+
+// ---------------------------------------------------------------------------
+// Putting a reading on screen
+// ---------------------------------------------------------------------------
+function applyReadings({ time, stations }) {
+  readingTime = time;
+  STATIONS = stations.map(s => {
+    const [x, y] = proj(s.lon, s.lat);
+    return { ...s, x, y };
+  });
+  setScale(STATIONS.map(s => s.t));
+  TOWNS.forEach(t => {
+    t.t = idw(t.x, t.y);
+    marks[t.id].setAttribute("aria-label", `${t.name} HDB town, estimated ${t.t.toFixed(1)} degrees Celsius`);
+  });
+  sorted = [...STATIONS].sort((a, b) => b.t - a.t);
+  sortedTowns = [...TOWNS].sort((a, b) => b.t - a.t);
+
+  document.getElementById("eyebrow").textContent =
+    `Dry-bulb air temperature · ${dateOf(time)}, ${clockOf(time)} SGT`;
+  renderStats();
+  renderLegend();
+  renderStations();
+  if (selected && !marks[selected]) selected = null;
+  if (selected) marks[selected].classList.add("on");
+  renderList();
+  draw();
+  if (!svg.matches(":hover")) restoreReadout();
+}
+
+const statusEl = document.getElementById("status");
+const statusLabel = document.getElementById("statusLabel");
+const statusDetail = document.getElementById("statusDetail");
+const refreshBtn = document.getElementById("refresh");
+
+function setStatus(state, label, detail) {
+  statusEl.dataset.state = state;
+  if (statusLabel.textContent !== label) statusLabel.textContent = label;
+  statusDetail.textContent = detail;
+}
+function ago(ms) {
+  const m = Math.round(ms / 60000);
+  if (m < 1) return "just now";
+  if (m < 120) return `${m} min ago`;
+  return `${Math.round(m / 60)} hr ago`;
+}
+function updateStatus() {
+  const clock = clockOf(readingTime);
+  if (!isLive) {
+    const saved = `${dateOf(readingTime)}, ${clock} SGT`;
+    if (feedFailed) setStatus("snapshot", "Saved snapshot", `NEA's feed didn't respond, so this shows the saved reading from ${saved}. Retrying every minute.`);
+    else setStatus("connecting", "Connecting", `Showing the saved reading from ${saved} until the latest one arrives.`);
+    return;
+  }
+  const age = Date.now() - readingTime;
+  if (feedFailed) setStatus("lost", "Connection lost", `Showing the ${clock} SGT reading from ${ago(age)}. Retrying every minute.`);
+  else if (age > STALE_MS) setStatus("delayed", "Delayed", `NEA's latest reading is from ${clock} SGT, ${ago(age)}.`);
+  else setStatus("live", "Live", `NEA reading from ${clock} SGT, ${ago(age)}. Checks every minute.`);
+}
+
+// ---------------------------------------------------------------------------
+// Start
+// ---------------------------------------------------------------------------
+refreshBtn.addEventListener("click", refresh);
+applyReadings({ time: SNAPSHOT_TIME, stations: SNAPSHOT_STATIONS });
+new ResizeObserver(draw).observe(stage);
+updateStatus();
+refresh();
+
+setInterval(() => { if (!document.hidden) refresh(); }, POLL_MS); // pauses in a background tab
+setInterval(updateStatus, 20 * 1000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && Date.now() - lastAttempt >= POLL_MS) refresh();
+});
+</script>
+</body>
+</html>

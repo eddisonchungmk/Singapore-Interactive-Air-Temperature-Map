@@ -949,7 +949,18 @@ svg.addEventListener("mouseleave", restoreReadout);
 const canvas = document.getElementById("heat");
 const stage = document.getElementById("stage");
 const surfaceBox = document.getElementById("surface");
-// coarse = true draws a quicker, blockier surface while the map is moving
+// The surface is worked out as one small image (one pixel per on-screen cell), then scaled up
+// smoothly and clipped to the coastline in a single drawImage. This is much faster than filling
+// each cell as its own rectangle.
+// coarse = true uses bigger cells while the map is moving.
+const heatBuf = document.createElement("canvas");
+const heatCtx = heatBuf.getContext("2d");
+const LUT_N = 256;
+function colourLut() {
+  const lut = new Uint8ClampedArray(LUT_N * 3);
+  for (let i = 0; i < LUT_N; i++) lut.set(colour(TMIN + (TMAX - TMIN) * i / (LUT_N - 1)), i * 3);
+  return lut;
+}
 function draw(coarse = false) {
   const r = stage.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
@@ -960,18 +971,43 @@ function draw(coarse = false) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   landPath.classList.toggle("flat", !surfaceBox.checked);
   if (!surfaceBox.checked || !STATIONS.length) return;
-  ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
-  ctx.transform(view.k, 0, 0, view.k, view.tx, view.ty);
-  ctx.save();
-  ctx.clip(new Path2D(landD));
-  const step = (coarse === true ? 7 : 3) / view.k;       // cell size stays constant on screen
-  const [x0, y0] = toWorld(0, 0), [x1, y1] = toWorld(W, H);
-  for (let y = Math.floor(Math.max(y0, OY - step) / step) * step; y < y1; y += step) {
-    for (let x = Math.floor(x0 / step) * step; x < x1; x += step) {
-      ctx.fillStyle = css(colour(idw(x + step / 2, y + step / 2)));
-      ctx.fillRect(x, y, step * 1.15, step * 1.15);
+
+  const cell = coarse === true ? 6 : 2;                  // cell size in screen units (920×520 viewBox)
+  const gw = Math.ceil(W / cell) + 1, gh = Math.ceil(H / cell) + 1;
+  if (heatBuf.width !== gw || heatBuf.height !== gh) { heatBuf.width = gw; heatBuf.height = gh; }
+  const img = heatCtx.createImageData(gw, gh), px = img.data;
+  const n = STATIONS.length;
+  const sx = Float64Array.from(STATIONS, s => s.x), sy = Float64Array.from(STATIONS, s => s.y), st = Float64Array.from(STATIONS, s => s.t);
+  const lut = colourLut(), lutScale = (LUT_N - 1) / (TMAX - TMIN);
+  const step = cell / view.k;                             // cell size in map units
+  const wx0 = (cell / 2 - view.tx) / view.k, wy0 = (cell / 2 - view.ty) / view.k;
+  let i = 0;
+  for (let gy = 0; gy < gh; gy++) {
+    const y = wy0 + gy * step;
+    for (let gx = 0; gx < gw; gx++, i += 4) {
+      const x = wx0 + gx * step;
+      let num = 0, den = 0, t = NaN;
+      for (let k = 0; k < n; k++) {                       // inverse-distance weighting, as in idw()
+        const dx = x - sx[k], dy = y - sy[k], d2 = dx * dx + dy * dy;
+        if (d2 < 1) { t = st[k]; break; }
+        const w = 1 / d2;
+        num += w * st[k]; den += w;
+      }
+      if (t !== t) t = num / den;
+      const j = Math.max(0, Math.min(LUT_N - 1, Math.round((t - TMIN) * lutScale))) * 3;
+      px[i] = lut[j]; px[i + 1] = lut[j + 1]; px[i + 2] = lut[j + 2]; px[i + 3] = 255;
     }
   }
+  heatCtx.putImageData(img, 0, 0);
+
+  ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+  ctx.save();
+  ctx.transform(view.k, 0, 0, view.k, view.tx, view.ty);
+  ctx.clip(new Path2D(landD));
+  ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(heatBuf, 0, 0, gw * cell, gh * cell);
   ctx.restore();
 }
 let drawFrame = 0, fineTimer = 0;

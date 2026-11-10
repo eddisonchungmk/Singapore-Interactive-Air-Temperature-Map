@@ -113,7 +113,6 @@ h1 {
 @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
 .map-card {
-  position: relative;
   background: var(--sea);
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -121,27 +120,6 @@ h1 {
 }
 .map-scroll { overflow-x: auto; }
 .map-stage { position: relative; min-width: 640px; aspect-ratio: 920 / 520; }
-#map { user-select: none; -webkit-user-select: none; touch-action: pan-x pan-y; }
-.map-stage.zoomed #map { touch-action: none; cursor: grab; }
-.map-stage.dragging #map, .map-stage.dragging #map * { cursor: grabbing; }
-.zoom {
-  position: absolute; top: 10px; right: 10px; z-index: 2;
-  display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
-}
-.zoom button {
-  width: 34px; height: 32px; display: grid; place-items: center;
-  font: 500 18px/1 var(--font-body); color: var(--ink); background: var(--surface);
-  border: 0; border-top: 1px solid var(--line); cursor: pointer; padding: 0;
-}
-.zoom button:first-child { border-top: 0; }
-.zoom button:hover:not(:disabled) { background: var(--paper); }
-.zoom button:disabled { color: var(--line); cursor: default; }
-.zoom button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.zoom svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.zoom-hint {
-  position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 2; margin: 0;
-  background: var(--ink); color: var(--surface); font-size: 13px; padding: 6px 12px; border-radius: 4px; pointer-events: none;
-}
 .map-stage canvas, .map-stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
 .map-bar {
@@ -161,7 +139,7 @@ h1 {
 .legend-ticks { display: flex; justify-content: space-between; font-family: var(--font-data); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* SVG map */
-.land { fill: none; stroke: var(--land-edge); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.land { fill: none; stroke: var(--land-edge); stroke-width: 1.2; }
 .land.flat { fill: var(--surface); }
 .sea-label { fill: var(--muted); font-family: var(--font-data); font-size: 11px; letter-spacing: .25em; text-transform: uppercase; opacity: .8; }
 .stn { cursor: pointer; outline: none; }
@@ -178,19 +156,6 @@ h1 {
 .town.on .mark { fill: var(--accent); stroke-width: 2; }
 .town.on .tname { font-weight: 700; opacity: 1; }
 .hide-towns .town { display: none; }
-.rail-case { fill: none; stroke: var(--surface); stroke-width: 4.4; stroke-linecap: round; stroke-linejoin: round; opacity: .92; vector-effect: non-scaling-stroke; }
-.rail-line { fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.rail-line.lrt { stroke-width: 1.6; }
-.rstn { cursor: pointer; }
-.rstn .hit { fill: transparent; }
-.rstn .dot { fill: var(--surface); stroke: var(--ink); stroke-width: 1.2; }
-.rstn.ix .dot { stroke-width: 1.7; }
-.rstn:hover .dot { stroke: var(--accent); stroke-width: 2.2; }
-.rstn .ring, .rstn .rname { display: none; }
-.names .rstn .rname { display: inline; fill: var(--ink); font-family: var(--font-body); font-size: 11px; font-weight: 500; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
-.rstn.on .ring { display: inline; fill: none; stroke: var(--accent); stroke-width: 2.5; }
-.rstn.on .rname { display: inline; fill: var(--ink); font-family: var(--font-body); font-size: 12px; font-weight: 700; paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; stroke-linejoin: round; }
-.hide-rail .rail { display: none; }
 
 /* Ledger */
 .ledger { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
@@ -242,56 +207,6 @@ h1 {
 .row.on .row-track, .row:hover .row-track { background: var(--line); }
 .row-fill { display: block; height: 100%; border-radius: 3px; }
 
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.rsearch {
-  display: block; width: calc(100% - 32px); margin: 12px 16px 6px;
-  font: inherit; font-size: 14px; color: var(--ink);
-  background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px;
-}
-.rsearch:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.rlist { list-style: none; margin: 0; padding: 4px 0 8px; max-height: 620px; overflow-y: auto; }
-.rrow {
-  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 8px 16px; border: 0; background: none; color: inherit; font: inherit; font-size: 14px; text-align: left; cursor: pointer;
-}
-.rrow:hover { background: var(--paper); }
-.rrow:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.rrow .codes { flex: none; }
-.rempty { padding: 10px 16px; font-size: 13px; color: var(--muted); margin: 0; }
-.code {
-  display: inline-block; font-family: var(--font-data); font-size: 11px; font-weight: 500; line-height: 1.5;
-  color: var(--ct); background: var(--c); border-radius: 3px; padding: 0 5px; margin-left: 3px;
-}
-.rcard { padding: 12px 16px 18px; display: grid; gap: 12px; }
-.rback { justify-self: start; font: inherit; font-size: 13px; font-weight: 500; color: var(--accent); background: none; border: 0; padding: 2px 0; cursor: pointer; }
-.rback:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.rhead { display: grid; gap: 6px; }
-.rhead h3 { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1.1; margin: 0; text-wrap: balance; }
-.rhead .codes .code { margin: 0 4px 0 0; font-size: 12px; padding: 1px 6px; }
-.rtemp { margin: 0; font-size: 13px; color: var(--muted); }
-.rtemp strong { color: var(--ink); font-family: var(--font-data); font-weight: 500; }
-.daypick { display: flex; gap: 4px; }
-.daypick button {
-  flex: 1; font: inherit; font-size: 13px; font-weight: 500; color: var(--muted);
-  background: none; border: 1px solid var(--line); border-radius: 4px; padding: 5px 6px; cursor: pointer;
-}
-.daypick button:hover { color: var(--ink); }
-.daypick button[aria-pressed="true"] { color: var(--surface); background: var(--ink); border-color: var(--ink); }
-.daypick button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.dir { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 6px; }
-.dir h4 { margin: 0; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.dir h4 .sw { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
-.times { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 0; font-size: 13px; }
-.times dt { color: var(--muted); }
-.times dd { margin: 0; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-.times dd small { font-family: var(--font-body); color: var(--muted); font-size: 12px; }
-.sub { margin: 0; font-size: 12px; color: var(--muted); }
-.sub b { font-family: var(--font-data); font-weight: 500; color: var(--ink); }
-.live { background: var(--paper); border-radius: 4px; padding: 10px 12px; display: grid; gap: 6px; font-size: 13px; }
-.live h4 { margin: 0; font-size: 14px; font-weight: 600; }
-.live p { margin: 0; color: var(--muted); }
-.live a { color: var(--accent); font-weight: 500; }
-.rsrc { margin: 0; font-size: 12px; color: var(--muted); }
 .note { font-size: 13px; color: var(--muted); max-width: 72ch; margin: 0; }
 .note strong { color: var(--ink); font-weight: 600; }
 
@@ -313,12 +228,6 @@ h1 {
 
   <div class="grid">
     <section class="map-card" aria-label="Temperature map of Singapore">
-      <div class="zoom" role="group" aria-label="Map zoom">
-        <button type="button" id="zoomIn" aria-label="Zoom in" title="Zoom in">+</button>
-        <button type="button" id="zoomOut" aria-label="Zoom out" title="Zoom out">−</button>
-        <button type="button" id="zoomReset" aria-label="Show the whole island" title="Show the whole island"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button>
-      </div>
-      <p class="zoom-hint" id="zoomHint" hidden>Hold Ctrl and scroll to zoom</p>
       <div class="map-scroll">
         <div class="map-stage" id="stage">
           <canvas id="heat" aria-hidden="true"></canvas>
@@ -326,11 +235,10 @@ h1 {
         </div>
       </div>
       <div class="map-bar">
-        <p class="readout" id="readout"><span class="tag">Hover over the island for an estimate. Double-click or use + to zoom, then drag to move.</span></p>
+        <p class="readout" id="readout"><span class="tag">Hover over the island for an estimate, or pick a station or town.</span></p>
         <div class="toggles">
           <label class="toggle"><input type="checkbox" id="surface" checked> Heat surface</label>
           <label class="toggle"><input type="checkbox" id="towns" checked> HDB towns</label>
-          <label class="toggle"><input type="checkbox" id="rail" checked> MRT/LRT</label>
         </div>
         <div class="legend" id="legend">
           <div class="legend-bar" id="legendBar"></div>
@@ -341,25 +249,15 @@ h1 {
 
     <aside class="ledger">
       <div class="tabs" role="tablist" aria-label="List to show">
-        <button class="tab" role="tab" id="tab-stations" aria-selected="true">Weather</button>
+        <button class="tab" role="tab" id="tab-stations" aria-selected="true">Weather stations</button>
         <button class="tab" role="tab" id="tab-towns" aria-selected="false">HDB towns</button>
-        <button class="tab" role="tab" id="tab-rail" aria-selected="false">MRT/LRT</button>
       </div>
       <h2 id="listTitle">Stations, warmest first <span>°C</span></h2>
       <ol id="list"></ol>
-      <div id="railPane" hidden>
-        <div id="railBrowse">
-          <label class="sr" for="railQuery">Find a station</label>
-          <input id="railQuery" class="rsearch" type="search" placeholder="Find a station, e.g. Bishan or NS17" autocomplete="off">
-          <ul class="rlist" id="railList"></ul>
-        </div>
-        <div id="railCard" class="rcard" hidden></div>
-      </div>
     </aside>
   </div>
 
   <p class="note"><strong>Where the numbers come from.</strong> Readings come live from the National Environment Agency's weather stations through data.gov.sg (1-minute dry-bulb readings). While the page is open it checks for new readings every minute. If the feed can't be reached, the page shows a saved snapshot from 30 Oct 2026, 11:54 pm instead. The colours between stations are an inverse-distance estimate, not a measurement, and the colour scale stretches to fit the current range of readings.</p>
-  <p class="note"><strong>MRT and LRT.</strong> Lines and stations come from sgraildata by Lim Chee Aun, built from LTA DataMall, data.gov.sg and OpenStreetMap. First and last train times and service frequencies come from LTA's station pages, collected on 11 Nov 2026. LTA doesn't publish live train arrivals online, so for real-time waiting times use the platform screens or LTA's MyTransport.SG app.</p>
   <p class="note"><strong>HDB towns.</strong> Town points come from two data.gov.sg datasets: HDB Property Information (each block's town and flat count) and HDB Existing Building (each block's footprint). Blocks were matched between them by street and block number, and each point is the flat-weighted centre of that town's residential blocks. Town temperatures are estimated from the surrounding stations; no station sits in most towns.</p>
 </div>
 
@@ -448,16 +346,6 @@ const LAND = [
   [[103.936,1.410],[103.960,1.421],[103.990,1.416],[104.002,1.405],[103.976,1.399],[103.946,1.401]]
 ];
 
-// ---------- MRT / LRT data (filled in by the build) ----------
-// RAIL_LINES: [lineKey, SVG path in map coordinates]; RAIL_STNS: [name, "code code", x, y, LTA id]
-// TT: LTA id -> directions [towards, first, last, freqIndex]; times "HHMM", ">Dest" marks a train ending early,
-//     ";" separates trains, "|" separates Mon–Fri|Sat|Sun & PH when they differ. TT_F: "peak/offpeak" per day type.
-const RAIL_LINES = [["BP","M324.7,201.1L324.1,208.3L340.8,215.9L345.2,215.1L354.2,210.8L356.6,214.0L364.1,213.1L373.0,218.2L376.4,213.1L376.8,207.4L375.9,206.6L371.1,206.5L370.6,205.1L374.8,198.7L373.0,196.5L366.8,193.5L364.6,194.2L358.1,201.0L357.6,204.4L361.3,212.5L357.2,214.2L354.1,210.9L349.1,212.6L345.2,215.1L340.6,215.9L324.0,208.2L324.4,201.1"],["SK","M604.3,188.9L606.7,183.2L608.4,181.5L619.6,185.1L625.1,189.7L625.1,192.5L618.7,200.1L615.6,207.2L611.8,205.8L602.2,197.3L604.3,188.9"],["SK","M604.3,188.9L606.8,182.2L605.5,180.9L597.5,178.7L583.3,176.7L569.6,175.4L568.2,176.2L568.2,186.2L570.3,188.9L575.2,187.4L578.7,187.7L593.9,196.8L597.5,197.6L601.4,197.0L604.3,188.9"],["PG","M615.6,169.3L623.6,173.5L639.3,186.1L641.1,185.5L646.7,177.6L646.1,175.4L626.0,161.0L621.7,158.7L619.4,159.8M619.4,159.8L617.7,163.3M617.7,163.3L616.3,165.5M616.3,165.5L615.0,168.1L615.6,169.3"],["PG","M617.4,163.0L615.3,167.2L613.6,168.4L607.9,166.5L607.6,164.0L616.5,144.0L620.1,141.0L623.1,140.5L626.6,142.2L627.5,144.6L617.4,163.0"],["TE","M400.9,82.3L407.4,95.1L407.2,97.4L405.2,102.3L405.9,109.0L405.2,114.0L406.6,117.5L408.8,119.2L417.5,122.6L420.7,124.7L431.2,139.0L439.9,148.1L442.7,157.1L445.9,162.8L449.9,167.4L456.2,168.7L458.5,170.1L463.4,180.8L470.6,187.2L493.2,198.7L497.5,202.8L501.2,209.0L500.8,216.3L496.7,221.6L493.5,236.1L482.6,246.3L481.0,250.2L481.5,252.0L483.9,254.5L489.5,257.7L492.8,260.8L498.3,270.1L499.9,275.0L500.7,283.2L502.1,287.0L502.2,300.0L501.1,302.1L499.2,303.5L481.8,308.9L479.2,310.6L475.0,318.5L474.7,326.6L468.3,336.5L463.6,340.3L462.5,343.4L463.0,349.9L466.2,353.4L469.1,354.0L473.9,353.2L478.8,350.0L481.6,349.7L484.1,350.9L489.8,357.5L490.6,359.9L489.5,365.8L490.4,371.0L490.0,383.3L490.7,385.5L493.0,388.0L504.7,395.0L511.4,394.2L513.6,394.6L535.8,408.9L539.9,409.3L549.8,402.6L559.6,387.7L559.4,382.7L553.3,369.5L553.7,366.9L556.0,364.4L558.7,363.8L569.7,364.0L583.4,362.1L597.4,363.4L605.9,360.3L611.3,359.3L617.9,356.5L626.8,350.4L632.4,347.8L671.4,339.0L676.3,338.9L690.7,334.2"],["DT","M357.3,213.0L358.7,224.6L362.7,230.5L366.9,239.1L366.4,244.9L367.0,250.9L370.4,258.3L372.1,267.2L375.5,272.3L381.7,276.3L383.2,282.6L385.8,286.8L422.7,301.5L432.6,304.8L449.1,315.2L465.1,317.9L492.0,326.8L498.9,333.9L513.3,341.6L527.1,352.5L539.8,366.5L541.0,373.7L540.8,384.5L540.0,387.6L533.5,397.1L531.3,398.3L529.0,398.4L509.3,386.3L505.7,382.3L505.9,378.3L510.3,371.6L518.9,362.8L527.6,352.5L534.7,341.8L541.8,334.2L546.6,331.5L550.3,325.2L561.8,317.9L571.5,313.1L575.9,307.7L578.4,307.3L585.1,309.9L591.8,310.5L613.7,301.8L623.2,295.0L637.5,290.7L649.6,295.2L652.7,295.6L668.4,290.8L677.2,290.5L684.8,288.8L686.2,287.4L686.7,285.2L684.6,275.2L684.1,264.3L693.4,255.4L696.9,253.2L716.1,254.2L724.9,252.1L727.4,253.0L729.4,255.2L731.1,259.7L731.4,264.4L724.9,288.1L725.3,289.7L728.4,292.4"],["CC","M484.5,413.3L474.6,421.6L471.2,422.7L465.7,422.9L449.1,413.6L441.7,412.4L435.1,409.8L429.8,409.0L401.5,399.3L397.0,396.6L393.3,390.6L392.2,385.1L392.7,381.2L394.3,377.9L397.9,374.0L398.9,367.4L400.0,364.7L405.5,356.9L411.7,343.9L415.6,339.4L428.1,331.6L436.7,330.0L445.3,323.0L452.8,320.8L458.5,313.9L461.4,301.2L463.4,299.2L472.8,295.9L494.2,296.1L499.0,294.6L501.2,290.5L500.2,276.3L501.2,266.2L502.6,261.3L505.3,259.4L507.2,259.5L512.5,261.8L534.6,266.6L545.8,262.8L552.0,261.8L556.3,262.4L563.9,265.6L569.4,275.9L583.4,282.7L586.9,285.3L589.4,288.6L591.6,294.0L598.5,325.8L598.2,338.8L597.4,340.6L585.3,344.7L564.4,354.3L547.4,358.0L542.3,360.7L540.7,363.5L541.0,377.9L539.8,387.6L527.5,406.3L525.2,407.1L520.8,406.4L511.6,408.7L490.4,408.7L484.6,413.3M540.9,371.8L540.0,374.2L536.3,374.1L519.4,362.9L511.3,359.9"],["NE","M469.2,422.8L474.9,421.4L478.4,418.5L492.9,402.7L500.7,395.8L513.6,380.5L514.8,377.5L514.9,373.9L510.3,363.4L512.1,358.0L522.2,341.6L529.3,333.7L537.7,326.8L554.2,306.2L558.2,290.4L559.1,275.7L562.2,268.8L566.2,264.2L591.3,241.2L597.0,235.0L599.4,226.0L600.8,201.9L604.6,188.4L620.2,157.7L622.1,149.7L625.0,147.1L632.2,144.9"],["EW","M704.6,222.9L701.8,232.6L696.3,244.1L693.9,254.0L695.2,257.1L716.5,284.0L718.0,293.3L716.7,297.3L714.3,300.3L705.8,305.5L689.2,311.2L659.0,315.5L648.9,318.8L641.8,318.6L627.7,321.5L615.9,322.1L572.5,329.5L557.7,338.5L548.5,341.3L523.3,366.9L524.0,369.5L527.4,374.6L523.5,383.4L522.7,390.6L516.2,400.9L511.9,402.0L507.3,401.4L501.9,394.1L493.5,388.5L489.0,384.2L477.4,384.1L473.9,383.2L468.8,379.7L461.5,379.0L455.7,376.4L443.9,373.9L440.1,370.6L435.7,363.9L415.1,346.0L398.7,343.6L384.0,335.3L370.6,336.4L366.6,335.4L363.9,332.6L361.4,326.8L351.6,310.3L349.0,308.9L338.7,306.2L332.3,305.6L323.1,301.0L321.4,299.3L315.8,289.9L300.4,278.4L297.6,277.0L284.0,275.5L273.7,278.4L248.8,288.3L230.5,289.5L225.8,293.8L221.0,300.2L219.0,304.6L217.2,306.2L214.5,306.9L186.4,307.8L180.1,308.8L167.6,323.6L162.5,328.5L160.0,329.1L157.2,328.5L122.9,296.2L121.8,291.9L124.4,283.9M699.5,308.0L715.6,300.8L722.7,298.9L725.3,297.1L735.2,282.5L744.3,277.9L747.8,274.2L751.5,267.2L757.7,251.7L759.7,249.4L762.5,248.3L766.8,248.2L777.4,251.9"],["NS","M320.3,297.0L317.8,292.1L318.2,288.5L337.4,262.8L338.4,260.4L337.1,235.4L335.7,233.1L325.6,223.4L323.7,219.6L322.7,214.3L324.2,203.8L324.0,190.1L329.0,180.6L334.2,161.2L331.4,141.4L331.8,138.2L333.3,135.4L337.7,132.2L349.5,129.6L354.1,127.8L362.9,121.7L366.9,115.9L370.2,113.6L376.4,112.2L389.0,112.1L398.6,105.4L411.1,101.1L422.7,100.1L434.8,94.8L438.4,92.9L444.2,87.4L447.6,85.6L467.3,80.9L470.5,80.8L473.4,81.7L478.8,86.6L488.2,101.9L490.9,106.9L492.7,114.9L491.8,134.3L481.9,153.5L481.4,158.5L479.2,164.9L479.8,171.7L481.6,175.5L484.5,178.8L501.2,189.5L503.8,192.3L508.7,203.8L515.8,212.1L517.9,224.9L526.3,242.2L526.0,244.9L523.6,249.9L518.3,258.3L515.1,272.4L514.4,284.0L516.3,301.9L513.2,312.5L510.9,317.8L505.4,324.8L502.4,331.8L490.2,341.7L487.0,349.3L487.4,352.6L488.9,355.9L490.6,357.1L492.9,357.7L497.3,357.4L512.1,360.9L522.0,367.2L527.0,374.1L523.5,384.3L523.0,390.1L527.9,398.6L529.7,406.2L536.7,412.6L540.7,412.7L543.9,410.8"]];
-const RAIL_STNS = [["Admiralty","NS10",429.3,97.3,"NS10"],["Aljunied","EW9",580.9,328.2,"EW9"],["Ang Mo Kio","NS16",519.4,228.3,"NS16"],["Bakau","SE3",623.2,195.0,"SE3"],["Bangkit","BP9",376.8,209.8,"BP9"],["Bartley","CC12",576.8,279.6,"CC12"],["Bayfront","CC34 DT16",538.4,390.8,"CC34-DT16"],["Bayshore","TE29",691.6,334.0,"TE29"],["Beauty World","DT5",382.9,281.0,"DT5"],["Bedok","EW5",668.7,313.9,"EW5"],["Bedok North","DT29",646.5,293.9,"DT29"],["Bedok Reservoir","DT30",672.2,291.0,"DT30"],["Bencoolen","DT21",521.0,360.5,"DT21"],["Bendemeer","DT23",544.5,333.2,"DT23"],["Bishan","NS17 CC15",517.1,262.9,"NS17-CC15"],["Boon Keng","NE9",541.7,321.6,"NE9"],["Boon Lay","EW27",252.7,287.0,"EW27"],["Botanic Gardens","CC19 DT9",456.7,316.5,"CC19-DT9"],["Braddell","NS18",514.3,283.0,"NS18"],["Bras Basah","CC2",521.3,364.1,"CC2"],["Bright Hill","TE7",488.5,240.6,"TE7"],["Buangkok","NE15",600.2,204.2,"NE15"],["Bugis","EW12 DT14",531.6,357.4,"EW12-DT14"],["Bukit Batok","NS2",334.0,267.3,"NS2"],["Bukit Gombak","NS3",338.1,249.1,"NS3"],["Bukit Panjang","DT1 BP6",357.3,213.1,"DT1-BP6"],["Buona Vista","EW21 CC22",410.3,344.9,"CC22-EW21"],["Caldecott","CC17 TE9",501.7,288.4,"CC17-TE9"],["Canberra","NS12",482.3,92.3,"NS12"],["Cantonment","CC31",496.2,408.3,"CC31"],["Cashew","DT2",361.6,229.1,"DT2"],["Changi Airport","CG2",777.4,251.9,"CG2"],["Cheng Lim","SW1",601.4,179.6,"SW1"],["Chinatown","NE4 DT19",509.2,386.2,"NE4-DT19"],["Chinese Garden","EW25",302.5,279.5,"EW25"],["Choa Chu Kang","NS4 BP1",324.6,201.1,"NS4-BP1"],["City Hall","NS25 EW13",523.7,371.0,"EW13-NS25"],["Clarke Quay","NE5",514.5,378.8,"NE5"],["Clementi","EW23",363.0,330.3,"EW23"],["Commonwealth","EW20",424.4,353.8,"EW20"],["Compassvale","SE1",613.9,182.9,"SE1"],["Coral Edge","PE3",636.5,184.1,"PE3"],["Cove","PE1",623.9,173.8,"PE1"],["Dakota","CC8",591.4,342.7,"CC8"],["Damai","PE7",629.0,163.0,"PE7"],["Dhoby Ghaut","NS24 NE6 CC1",511.1,360.6,"NS24-NE6-CC1"],["Dover","EW22",387.9,337.2,"EW22"],["Downtown","DT17",526.5,397.0,"DT17"],["Esplanade","CC3",531.4,370.9,"CC3"],["Eunos","EW7",618.8,321.6,"EW7"],["Expo","DT35 CG1",728.6,292.2,"CG1-DT35"],["Fajar","BP10",373.3,201.4,"BP10"],["Farmway","SW2",593.0,178.0,"SW2"],["Farrer Park","NE8",528.4,334.8,"NE8"],["Farrer Road","CC20",442.0,325.7,"CC20"],["Fernvale","SW5",569.1,187.8,"SW5"],["Fort Canning","DT20",509.5,372.5,"DT20"],["Gardens by the Bay","TE22",553.9,396.5,"TE22"],["Geylang Bahru","DT24",561.1,318.3,"DT24"],["Great World","TE15",489.7,368.3,"TE15"],["Gul Circle","EW30",168.5,322.3,"EW30"],["HarbourFront","NE1 CC29",469.1,422.6,"NE1-CC29"],["Havelock","TE16",490.1,381.6,"TE16"],["Haw Par Villa","CC25",393.7,390.6,"CC25"],["Hillview","DT3",366.4,242.5,"DT3"],["Holland Village","CC21",419.6,335.9,"CC21"],["Hougang","NE14",599.6,224.9,"NE14"],["Hume","DT4",370.4,257.5,"DT4"],["Jalan Besar","DT22",530.0,348.9,"DT22"],["Jelapang","BP12",361.7,197.5,"BP12"],["Joo Koon","EW29",201.7,306.9,"EW29"],["Jurong East","NS1 EW24",320.5,296.9,"EW24-NS1"],["Kadaloor","PE5",643.6,173.5,"PE5"],["Kaki Bukit ","DT28",629.1,293.4,"DT28"],["Kallang","EW10",559.9,337.1,"EW10"],["Kangkar","SE4",617.2,202.6,"SE4"],["Katong Park","TE24",587.4,362.4,"TE24"],["Keat Hong","BP3",333.0,212.5,"BP3"],["Kembangan","EW6",636.8,319.3,"EW6"],["Kent Ridge","CC24",398.6,370.8,"CC24"],["Keppel","CC30",484.5,413.2,"CC30"],["Khatib","NS14",488.8,140.6,"NS14"],["King Albert Park","DT6",398.1,292.2,"DT6"],["Kovan","NE13",585.0,247.1,"NE13"],["Kranji","NS7",357.0,126.0,"NS7"],["Kupang","SW3",578.3,176.1,"SW3"],["Labrador Park","CC27",432.7,409.7,"CC27"],["Lakeside","EW26",280.6,276.1,"EW26"],["Lavender","EW11",544.5,344.6,"EW11"],["Layar","SW6",576.1,187.4,"SW6"],["Lentor","TE5",495.5,201.1,"TE5"],["Little India","NE7 DT12",519.0,346.2,"NE7-DT12"],["Lorong Chuan","CC14",545.2,262.8,"CC14"],["MacPherson","CC10 DT26",594.7,308.8,"CC10-DT26"],["Marina Bay","NS27 CC33 TE20",529.1,404.5,"NS27-CC33-TE20"],["Marina South Pier","NS28",543.9,410.8,"NS28"],["Marine Parade","TE26",622.3,353.5,"TE26"],["Marine Terrace","TE27",641.1,346.0,"TE27"],["Marsiling","NS8",379.7,112.4,"NS8"],["Marymount","CC16",500.3,268.1,"CC16"],["Mattar","DT25",581.5,308.3,"DT25"],["Maxwell","TE18",509.2,394.2,"TE18"],["Mayflower","TE6",495.8,224.5,"TE6"],["Meridian","PE2",629.5,178.4,"PE2"],["Mountbatten","CC7",580.6,346.8,"CC7"],["Napier","TE12",462.8,345.2,"TE12"],["Newton","NS21 DT11",499.6,334.3,"NS21-DT11"],["Nibong","PW5",613.6,150.8,"PW5"],["Nicoll Highway","CC5",545.4,359.0,"CC5"],["Novena","NS20",508.2,321.1,"NS20"],["Oasis","PE6",636.6,168.5,"PE6"],["one-north","CC23",403.9,359.1,"CC23"],["Orchard","NS22 TE14",486.9,352.4,"NS22-TE14"],["Orchard Boulevard","TE13",472.1,353.9,"TE13"],["Outram Park","EW16 NE3 TE17",502.2,394.2,"EW16-NE3-TE17"],["Pasir Panjang","CC26",412.0,402.6,"CC26"],["Pasir Ris","EW1",704.5,222.8,"EW1"],["Paya Lebar","EW8 CC9",598.8,324.9,"EW8-CC9"],["Pending","BP8",374.2,217.0,"BP8"],["Petir","BP7",365.6,214.1,"BP7"],["Phoenix","BP5",349.6,212.5,"BP5"],["Pioneer","EW28",237.1,288.6,"EW28"],["Potong Pasir","NE10",555.7,300.4,"NE10"],["Prince Edward Road","CC32",515.5,407.9,"CC32"],["Promenade","CC4 DT15",539.1,369.8,"CC4-DT15"],["Punggol","NE17 PTC",617.4,163.0,"NE17-PTC"],["Punggol Coast","NE18",632.2,144.9,"NE18"],["Punggol Point","PW3",625.4,141.5,"PW3"],["Queenstown","EW19",438.8,368.5,"EW19"],["Raffles Place","NS26 EW14",523.0,387.3,"EW14-NS26"],["Ranggung","SE5",608.2,202.4,"SE5"],["Redhill","EW18",458.6,377.6,"EW18"],["Renjong","SW8",595.4,197.4,"SW8"],["Riviera","PE4",643.0,182.8,"PE4"],["Rochor","DT13",525.2,351.0,"DT13"],["Rumbia","SE2",624.1,188.5,"SE2"],["Sam Kee","PW1",621.6,154.7,"PW1"],["Samudera","PW4",617.1,143.1,"PW4"],["Segar","BP11",371.1,195.4,"BP11"],["Sembawang","NS11",464.7,81.7,"NS11"],["Sengkang","NE16 STC",604.3,188.9,"NE16-STC"],["Senja","BP13",357.7,204.9,"BP13"],["Serangoon","NE12 CC13",564.4,265.9,"NE12-CC13"],["Shenton Way","TE19",521.3,399.8,"TE19"],["Siglap","TE28",668.8,339.8,"TE28"],["Simei","EW3",712.1,278.2,"EW3"],["Sixth Avenue","DT7",422.4,301.6,"DT7"],["Somerset","NS23",499.0,357.8,"NS23"],["Soo Teck","PW7",608.0,162.8,"PW7"],["South View","BP2",326.0,209.4,"BP2"],["Springleaf","TE4",460.8,176.9,"TE4"],["Stadium","CC6",567.4,352.9,"CC6"],["Stevens","DT10 TE11",474.8,320.9,"DT10-TE11"],["Sumang","PW6",610.4,156.9,"PW6"],["Tai Seng","CC11",591.1,293.7,"CC11"],["Tampines","EW2 DT32",696.7,259.3,"EW2-DT32"],["Tampines East","DT33",715.1,254.3,"DT33"],["Tampines West","DT31",684.6,273.9,"DT31"],["Tan Kah Kee","DT8",441.9,310.7,"DT8"],["Tanah Merah","EW4 CG",699.4,307.8,"EW4"],["Tanjong Katong","TE25",608.2,359.6,"TE25"],["Tanjong Pagar","EW15",512.7,401.8,"EW15"],["Tanjong Rhu","TE23",563.8,363.4,"TE23"],["Teck Lee","PW2",625.4,149.2,"PW2"],["Teck Whye","BP4",341.5,216.1,"BP4"],["Telok Ayer","DT18",518.0,391.5,"DT18"],["Telok Blangah","CC28",445.8,413.0,"CC28"],["Thanggam","SW4",567.9,177.5,"SW4"],["Tiong Bahru","EW17",478.8,384.2,"EW17"],["Toa Payoh","NS19",515.3,298.4,"NS19"],["Tongkang","SW7",586.7,192.4,"SW7"],["Tuas Crescent","EW31",148.4,319.7,"EW31"],["Tuas Link","EW33",125.0,283.3,"EW33"],["Tuas West Road","EW32",130.9,303.6,"EW32"],["Ubi","DT27",611.9,303.1,"DT27"],["Upper Changi","DT34",726.8,281.0,"DT34"],["Upper Thomson","TE8",488.4,257.2,"TE8"],["Woodlands","NS9 TE2",403.3,103.8,"NS9-TE2"],["Woodlands North","TE1",400.7,82.5,"TE1"],["Woodlands South","TE3",416.9,122.4,"TE3"],["Woodleigh","NE11",558.8,285.6,"NE11"],["Yew Tee","NS5",329.9,177.5,"NS5"],["Yio Chu Kang","NS15",511.0,206.6,"NS15"],["Yishun","NS13",492.5,118.2,"NS13"]];
-const TT_F = ["4-6/10*|8-10/8-10|/8-10", "2-5/5*|4-5/5*|/5*", "2-4*/5-6*|5*/5-6*|5*/5-6*", "2-2.5/5.75|2-2.5/5.75|/5.75", "3/6*|3/6*|3/6*", "3/5*|4/5*|4/5*", "7-9/12|7-9/12|/12", "2-4*/5–6*|5*/5–6*|5*/5–6*", "2.5-3.5/4-5|3.5-4/3.5-5|/3.5-5", "2*/5-6*|5*/5-6*|5*/5-6*", "2-4*/5-6*|5*/5-6*|/5-6*", "5-6/6-7|/6-7|/7-8", "20/20*|20/20*|/20*", "20/20|20/20|/20"];
-const TT = {"EW29":[["Pasir Ris","0529|0529|0559","2329",0],["Tuas Link","0527|0527|0557","0038",0]],"EW28":[["Pasir Ris","0532|0532|0602","2332",1],["Tuas Link","0523|0523|0553","0035",1]],"EW27":[["Pasir Ris","0534|0534|0604","2334",1],["Tuas Link","0521|0521|0551","0032",1]],"EW26":[["Pasir Ris","0537|0537|0607","2337",1],["Tuas Link","0518|0518|0548","0029",1]],"EW25":[["Pasir Ris","0539|0539|0609","2339",1],["Tuas Link","0516|0516|0546","0027",1]],"EW24-NS1":[["Pasir Ris","0542|0542|0612","2342",1],["Tuas Link","0514|0514|0544","0025",1],["Marina South Pier","0516|0516|0535","2246;2253>Marina Bay;2328>Toa Payoh;0017>Ang Mo Kio",1]],"EW23":[["Pasir Ris","0538|0538|0606","2346",1],["Tuas Link","0621|0621|0647","0020",1]],"EW22":[["Pasir Ris","0540|0540|0608","2349",1],["Tuas Link","0618|0618|0644","0017",1]],"CC22-EW21":[["Bayfront","0539|0539|0601","2303;2318>Marina Bay;0002>Pasir Panjang;0020>one-north",2],["Dhoby Ghaut","0540|0540|0603","2334;2356>Mountbatten;0018>Bartley",2],["Pasir Ris","0543|0543|0611","2351",1],["Tuas Link","0616|0616|0642","0015",1]],"EW20":[["Pasir Ris","0545|0545|0613","2353",1],["Tuas Link","0614|0614|0640","0012",1]],"EW19":[["Pasir Ris","0547|0547|0615","2355",1],["Tuas Link","0612|0612|0638","0010",1]],"EW18":[["Pasir Ris","0549|0549|0617","2358",1],["Tuas Link","0609|0609|0635","0008",1]],"EW17":[["Pasir Ris","0552|0552|0620","0000",1],["Tuas Link","0607|0607|0633","0005",1]],"EW16-NE3-TE17":[["Pasir Ris","0554|0554|0622","0003",1],["Tuas Link","0604|0604|0630","0002",1],["HarbourFront","0612|0612|0632","2358",1],["Punggol Coast","0548|0548|0608","2359",3],["Woodlands North","0607|0607|0627","0007;0013>Springleaf;0019>Caldecott;0025>Orchard",4],["Bayshore","0556|0556|0616","0009;0014>Marine Terrace;0020>Gardens by the Bay",4]],"EW15":[["Pasir Ris","0556|0556|0624","0005",1],["Tuas Link","0602|0602|0628","0000",1]],"EW14-NS26":[["Pasir Ris","0559|0559|0627","0008",1],["Tuas Link","0600|0600|0626","2358",1],["Jurong East","0603|0603|0628","2353;0009>Kranji",1],["Marina South Pier","0557|0557|0622","2354;2358>Marina Bay",1]],"EW13-NS25":[["Pasir Ris","0601|0601|0629","0010",1],["Tuas Link","0558|0558|0624","2355",1],["Jurong East","0605|0605|0630","2355;0011>Kranji",1],["Marina South Pier","0554|0554|0620","2352;2356>Marina Bay",1]],"EW12-DT14":[["Pasir Ris","0603|0603|0631","0013",1],["Tuas Link","0556|0556|0622","2353",1],["Bukit Panjang","0603|0603|0632","0022",5],["Expo","0557|0557|0617","0001",5]],"EW11":[["Pasir Ris","0605|0605|0633","0015",1],["Tuas Link","0554|0554|0620","2350",1]],"EW10":[["Pasir Ris","0607|0607|0635","0017",1],["Tuas Link","0551|0551|0617","2348",1]],"EW9":[["Pasir Ris","0610|0610|0638","0020",1],["Tuas Link","0549|0549|0615","2346",1]],"EW8-CC9":[["Pasir Ris","0612|0612|0640","0022",1],["Tuas Link","0547|0547|0613","2343",1],["Bayfront","0540|0540|0607","2332>Pasir Panjang;2335;2349>one-north;2349>Marina Bay;0019>Caldecott;0025>Tai Seng",2],["Dhoby Ghaut","0533|0533|0607","2303;0027>Mountbatten",2]],"EW7":[["Pasir Ris","0614|0614|0642","0025",1],["Tuas Link","0545|0545|0611","2341",1]],"EW6":[["Pasir Ris","0616|0616|0644","0027",1],["Tuas Link","0543|0543|0609","2339",1]],"EW5":[["Pasir Ris","0619|0619|0647","0030",1],["Tuas Link","0540|0540|0606","2336",1]],"EW4":[["Pasir Ris","0516|0516|0542","0033",1],["Tuas Link","0537|0537|0603","2333",1],["Changi Airport","0520|0520|0547","2350",6]],"EW3":[["Pasir Ris","0519|0519|0545","0037",1],["Tuas Link","0534|0534|0600","2329",1]],"EW2-DT32":[["Pasir Ris","0522|0522|0548","0039",1],["Tuas Link","0531|0531|0557","2326",1],["Bukit Panjang","0543|0543|0601","2347",5]],"EW1":[["Tuas Link","0528|0528|0554","2323",1]],"CG1-DT35":[["Tanah Merah","0536|0536|0604","2323>Tuas Link;0011>Pasir Ris",6],["Changi Airport","0523|0523|0550","2353",6],["Bukit Panjang","0536|0536|0554","2340",5]],"CG2":[["Tanah Merah","0531|0531|0559","2318>Tuas Link;0006>Pasir Ris",6]],"NS2":[["Jurong East","0545|0545|0608","0055",1],["Marina South Pier","0519|0519|0538","2250;2256>Marina Bay;2331>Toa Payoh;0020>Ang Mo Kio",1]],"NS3":[["Jurong East","0543|0543|0606","0052",1],["Marina South Pier","0521|0521|0540","2252;2258>Marina Bay;2333>Toa Payoh;0022>Ang Mo Kio",1]],"NS4-BP1":[["Jurong East","0540|0540|0603","0049",1],["Marina South Pier","0525|0525|0544","2255;2301>Marina Bay;2337>Toa Payoh;0026>Ang Mo Kio",1]],"NS5":[["Jurong East","0537|0537|0600","0046",1],["Marina South Pier","0527|0527|0546","2258;2304>Marina Bay;2340>Toa Payoh;0029>Ang Mo Kio",1]],"NS7":[["Jurong East","0543|0543|0607","0041",1],["Marina South Pier","0522|0522|0538","2306;2309>Marina Bay;2345>Toa Payoh;0034>Ang Mo Kio",1]],"NS8":[["Jurong East","0541|0540|0604","0038;0055>Kranji",1],["Marina South Pier","0524|0524|0541","2309;2312>Marina Bay;2348>Toa Payoh;0037>Ang Mo Kio",1]],"NS9-TE2":[["Jurong East","0538|0538|0558","0036;0052>Kranji",1],["Marina South Pier","0527|0527|0545","2312;2315>Marina Bay;2350>Toa Payoh;0039>Ang Mo Kio",1],["Woodlands North","0539|0539|0559","0042",4],["Bayshore","0538|0538|0558","2333;2338>Marine Terrace;2344>Gardens by the Bay;2350>Outram Park;0002>Orchard;0008>Caldecott",4]],"NS10":[["Jurong East","0535|0534|0558","0033;0049>Kranji",1],["Marina South Pier","0530|0530|0548","2316;2318>Marina Bay;2353>Toa Payoh;0042>Ang Mo Kio",1]],"NS11":[["Jurong East","0531|0530|0554","0029;0046>Kranji",1],["Marina South Pier","0534|0534|0552","2319;2321>Marina Bay;2357>Toa Payoh;0046>Ang Mo Kio",1]],"NS12":[["Jurong East","0529|0529|0552","0031;0047>Kranji",1],["Marina South Pier","0535|0535|0551","2317;2325>Marina Bay;2359>Toa Payoh;0048>Ang Mo Kio",1]],"NS13":[["Jurong East","0527|0526|0550","0025;0042>Kranji",1],["Marina South Pier","0524|0524|0557","2323;2325>Marina Bay;0001>Toa Payoh;0050>Ang Mo Kio",1]],"NS14":[["Jurong East","0516>Yishun;0525|0516>Yishun;0524|0548","0023;0039>Kranji",1],["Marina South Pier","0526|0526|0559","2325;2328>Marina Bay;0003>Toa Payoh;0053>Ang Mo Kio",1]],"NS15":[["Jurong East","0510>Yishun;0520|0510>Yishun;0519|0543","0017;0034>Kranji",1],["Marina South Pier","0531|0531|0604","2331;2333>Marina Bay;0009>Toa Payoh;0058>Ang Mo Kio",1]],"NS16":[["Jurong East","0507>Yishun;0517|0507>Yishun;0516|0540","0015;0032>Kranji",1],["Marina South Pier","0534|0534|0607","2334;2336>Marina Bay;0011>Toa Payoh",1]],"NS17-CC15":[["Jurong East","0608|0622|0630","0012;0028>Kranji",1],["Marina South Pier","0537|0537|0602","2337;2339>Marina Bay;0015>Toa Payoh",1],["Bayfront","0540|0540|0607","2320;2335>Marina Bay;2346>Pasir Panjang;0003>one-north;0034>Caldecott",2],["Dhoby Ghaut","0523|0523|0546","2318;0012>Mountbatten;0035>Bartley",2]],"NS18":[["Jurong East","0606|0620|0627","0009;0026>Kranji",1],["Marina South Pier","0539|0539|0605","2339;2341>Marina Bay;0017>Toa Payoh",1]],"NS19":[["Jurong East","0604|0618|0625","0008;0024>Kranji",1],["Marina South Pier","0541|0541|0606","2340;2343>Marina Bay",1]],"NS20":[["Jurong East","0601|0615|0622","0005;0022>Kranji",1],["Marina South Pier","0544|0544|0609","2343;2346>Marina Bay",1]],"NS21-DT11":[["Jurong East","0559|0613|0620","0003;0020>Kranji",1],["Marina South Pier","0546|0546|0611","2345;2348>Marina Bay",1],["Bukit Panjang","0556|0556|0616","0028",5],["Expo","0551|0551|0611","2355",5]],"NS22-TE14":[["Jurong East","0611|0611|0636","0000;0017>Kranji",1],["Marina South Pier","0549|0549|0614","2347;2350>Marina Bay",1],["Woodlands North","0552|0552|0612","0013;0019>Springleaf;0025>Caldecott",4],["Bayshore","0555|0555|0615","0003;0008>Marine Terrace;0014>Gardens by the Bay;0020>Outram Park",4]],"NS23":[["Jurong East","0609|0609|0634","2358;0015>Kranji",1],["Marina South Pier","0551|0551|0616","2349;2352>Marina Bay",1]],"NS24-NE6-CC1":[["Jurong East","0607|0607|0632","2357;0013>Kranji",1],["Marina South Pier","0552|0552|0617","2350;2354>Marina Bay",1],["Bayfront","0537>Prince Edward Road;0537>Stadium||0605>Stadium","2356>Stadium",2],["Punggol Coast","0553|0553|0613","0005",3],["","0537|0537|0605","2248;2318>Pasir Panjang;2334>one-north;0002>Caldecott;0010>Tai Seng",1]],"NS27-CC33-TE20":[["Jurong East","0601|0601|0626","2350;0007>Kranji",1],["Marina South Pier","0605|0605|0629","2356",1],["Bayfront","0559|0559|0623","2352",7],["Dhoby Ghaut","0558|0558|0623","2248;2316>Pasir Panjang;2333>one-north;0003>Caldecott;0009>Tai Seng",7],["Woodlands North","0602|0602|0622","0002;0008>Springleaf;0014>Caldecott;0020>Orchard",4],["Bayshore","0601|0601|0621","0014;0019>Marine Terrace;0025>Gardens by the Bay",4]],"CC30":[["Bayfront","0605|0605|0630","2244;2257>Marina Bay",2],["Dhoby Ghaut","0549|0549|0614","2337>Mountbatten;2353;2359>Bartley",2]],"CC31":[["Bayfront","0603|0603|0628","2243;2255>Marina Bay",2],["Dhoby Ghaut","0551|0551|0616","2335>Mountbatten;2355;2357>Bartley",2]],"CC32":[["Bayfront","0601|0601|0625","2240;2253>Marina Bay",2],["Dhoby Ghaut","0554|0554|0619","2333>Mountbatten;2355>Bartley;2358",2]],"NE1-CC29":[["Punggol Coast","0547|0547|0607","2355",3],["Bayfront","0530|0530|0551","2247;2302>Marina Bay",2],["Dhoby Ghaut","0547|0547|0612","2340>Mountbatten;2351;0002>Bartley",2]],"NE4-DT19":[["HarbourFront","0610|0610|0630","2356",8],["Punggol Coast","0549|0549|0609","0001",3],["Bukit Panjang","0610|0610|0628","0014",5],["Expo","0608|0608|0628","0010",5]],"NE5":[["HarbourFront","0608|0608|0628","2355",3],["Punggol Coast","0551|0551|0611","0002",8]],"NE7-DT12":[["HarbourFront","0604|0604|0624","2350",8],["Punggol Coast","0556|0556|0616","0007",3],["Bukit Panjang","0606|0606|0630","0026",5],["Expo","0553|0553|0613","2358",5]],"NE8":[["HarbourFront","0602|0602|0622","2348",8],["Punggol Coast","0557|0557|0617","0009",3]],"NE9":[["HarbourFront","0600|0600|0620","2346",8],["Punggol Coast","0559|0559|0619","0011",3]],"NE10":[["HarbourFront","0558|0558|0618","2344",8],["Punggol Coast","0602|0602|0622","0013",3]],"NE11":[["HarbourFront","0556|0556|0616","2342",8],["Punggol Coast","0604|0604|0624","0015",3]],"NE12-CC13":[["HarbourFront","0554|0554|0614","2340",8],["Punggol Coast","0606|0606|0626","0017",3],["Bayfront","0545|0545|0611","2325;2340>Marina Bay;2341>Pasir Panjang;2358>one-north;0029>Caldecott",2],["Dhoby Ghaut","0518|0518|0541","2313;0017>Mountbatten;0040>Bartley",2]],"NE13":[["HarbourFront","0551|0551|0611","2337",8],["Punggol Coast","0608|0608|0628","0020",3]],"NE14":[["HarbourFront","0549|0549|0609","2335",8],["Punggol Coast","0611|0611|0631","0023",3]],"NE15":[["HarbourFront","0546|0546|0606","2332",8],["Punggol Coast","0613|0613|0633","0025",3]],"NE16-STC":[["HarbourFront","0544|0544|0604","2330",8],["Punggol Coast","0533|0533|0553","0027",3]],"NE17-PTC":[["HarbourFront","0542|0542|0602","2328",8],["Punggol Coast","0536|0536|0556","0030",3]],"NE18":[["HarbourFront","0539|0539|0559","2325",3]],"CC28":[["Bayfront","0532|0532|0553","2250;2304>Marina Bay",2],["Dhoby Ghaut","0544|0544|0608","2343>Mountbatten;2347;0004>Bartley",2]],"CC27":[["Bayfront","0534|0534|0555","2252;2306>Marina Bay",2],["Dhoby Ghaut","0542|0542|0607","2345>Mountbatten;2346;0006>Bartley",2]],"CC26":[["Bayfront","0530|0530|0552","2254;2308>Marina Bay",2],["Dhoby Ghaut","0540|0540|0604","2343;2347>Mountbatten;0009>Bartley",2]],"CC25":[["Bayfront","0532|0532|0554","2256;2310>Marina Bay;0009>Pasir Panjang",2],["Dhoby Ghaut","0538|0538|0602","2341;2349>Mountbatten;0011>Bartley",2]],"CC24":[["Bayfront","0535|0535|0557","2259;2313>Marina Bay;0006>Pasir Panjang",2],["Dhoby Ghaut","0535|0535|0600","2339;2352>Mountbatten;0014>Bartley",2]],"CC23":[["Bayfront","0537|0537|0558","2301;2315>Marina Bay;0004>Pasir Panjang",2],["Dhoby Ghaut","0543|0543|0605","2337;2354>Mountbatten;0015>Bartley",2]],"CC21":[["Bayfront","0541|0541|0603","2305;2319>Marina Bay;0002>Pasir Panjang;0018>one-north",2],["Dhoby Ghaut","0538|0538|0601","2332;2358>Mountbatten;0020>Bartley",2]],"CC20":[["Bayfront","0543|0543|0605","2308;2322>Marina Bay;2358>Pasir Panjang;0015>one-north",2],["Dhoby Ghaut","0536|0536|0558","2330;0000>Mountbatten;0022>Bartley",9]],"CC19-DT9":[["Bayfront","0546|0546|0608","2310;2325>Marina Bay;2356>Pasir Panjang;0013>one-north",2],["Dhoby Ghaut","0534|0534|0556","2328;0003>Mountbatten;0025>Bartley",2],["Bukit Panjang","0600|0600|0621","0032",2],["Expo","0546|0546|0606","2350",5]],"CC17-TE9":[["Bayfront","0534|0534|0602","2315;2329>Marina Bay;2351>Pasir Panjang;0008>one-north",2],["Dhoby Ghaut","0529|0529|0551","2323;0007>Mountbatten;0030>Bartley",2],["Woodlands North","0552|0552|0612","0023;0029>Springleaf",4],["Bayshore","0548|0548|0608","2352;2358>Marine Terrace;0004>Gardens by the Bay;0010>Outram Park;0022>Orchard",4]],"CC16":[["Bayfront","0536|0536|0604","2317;2332>Marina Bay;2348>Pasir Panjang;0006>one-north;0037>Caldecott",2],["Dhoby Ghaut","0526|0526|0549","2320;0010>Mountbatten;0032>Bartley",2]],"CC14":[["Bayfront","0542|0542|0609","2323;2337>Marina Bay;2343>Pasir Panjang;0000>one-north;0031>Caldecott",2],["Dhoby Ghaut","0520|0520|0543","2315;0015>Mountbatten;0037>Bartley",2]],"CC12":[["Bayfront","0547|0547|0614","2328;2338>Pasir Panjang;2342>Marina Bay;2355>one-north;0026>Caldecott",2],["Dhoby Ghaut","0516|0516|0538","2310;0020>Mountbatten",2]],"CC11":[["Bayfront","0535|0535|0602","2330;2336>Pasir Panjang;2344>Marina Bay;2353>one-north;0024>Caldecott",2],["Dhoby Ghaut","0538|0538|0612","2307;0002>Mountbatten",2]],"CC10-DT26":[["Bayfront","0538|0538|0604","2332;2334>Pasir Panjang;2347>Marina Bay;2351>one-north;0022>Caldecott;0028>Tai Seng",2],["Dhoby Ghaut","0536|0536|0610","2305;0024>Mountbatten",2],["Bukit Panjang","0556|0556|0614","0000",5],["Expo","0603|0603|0623","0024",5]],"CC8":[["Bayfront","0543|0543|0609","2329>Pasir Panjang;2337;2346>one-north;2352>Marina Bay;0017>Caldecott;0023>Tai Seng",2],["Dhoby Ghaut","0531|0531|0604","2300;0029>Mountbatten",2]],"CC7":[["Bayfront","0544|0544|0611","2327>Pasir Panjang;2339;2344>one-north;2353>Marina Bay;0015>Caldecott;0021>Tai Seng",2],["Dhoby Ghaut","0529|0529|0603","2258",10]],"CC6":[["Bayfront","0546;0547>Prince Edward Road|0546|0613","2325>Pasir Panjang;2341;2342>one-north;2355>Marina Bay;0013>Caldecott;0019>Tai Seng",7],["Dhoby Ghaut","0607|0607|0633","2256",7]],"CC5":[["Bayfront","0544>Prince Edward Road;0548|0544>Stadium;0548|0612>Stadium;0615","2323>Pasir Panjang;2340>one-north;2343;2358>Marina Bay;0004>Stadium;0011>Caldecott;0016>Tai Seng",7],["Dhoby Ghaut","0604|0604|0630","2254",7]],"CC4-DT15":[["Bayfront","0542>Prince Edward Road;0551|0542>Stadium;0551|0610>Stadium;0618","2321>Pasir Panjang;2338>one-north;2345;0000>Marina Bay;0002>Stadium;0009>Caldecott;0014>Tai Seng",7],["Dhoby Ghaut","0602|0602|0628","2252",7],["Bukit Panjang","0617|0617|0635","0020",5],["Expo","0600|0600|0620","0003",5]],"CC3":[["Bayfront","0540>Prince Edward Road;0557|0540>Stadium;0557|0608>Stadium;0617","2359;0000>Stadium",2],["Dhoby Ghaut","0557|0557|0617","2359",2]],"CC2":[["Bayfront","0538>Prince Edward Road;0558|0538>Stadium;0558|0606>Stadium;0619","2358>Stadium;0001",2],["Dhoby Ghaut","0558|0558|0619","0001",7]],"CC34-DT16":[["Dhoby Ghaut","0600|0600|0626","2250;2318>Pasir Panjang;2335>one-north;0006>Caldecott;0012>Tai Seng",2],["Bukit Panjang","0615|0615|0633","0018",5],["Expo","0602|0602|0622","0005",5]],"DT17":[["Bukit Panjang","0613|0613|0630","0016",5],["Expo","0604|0604|0624","0007",5]],"DT18":[["Bukit Panjang","0611|0611|0629","0015",5],["Expo","0606|0606|0626","0008",5]],"BP2":[["Choa Chu Kang","0511>Petir;0514>Senja|0511>Petir;0514>Senja|0530>Petir;0533>Senja","0053>Petir;0056>Senja",11]],"BP3":[["Choa Chu Kang","0509>Petir;0516>Senja|0509>Petir;0516>Senja|0528>Petir;0535>Senja","0051>Petir;0058>Senja",11]],"BP4":[["Choa Chu Kang","0508>Petir;0517>Senja|0508>Petir;0517>Senja|0527>Petir;0536>Senja","0050>Petir;0059>Senja",11]],"BP5":[["Choa Chu Kang","0507>Petir;0518>Senja|0507>Petir;0518>Senja|0526>Petir;0537>Senja","0049>Petir;0100>Senja",11]],"DT1-BP6":[["Expo","0530|0530|0550","2335",5],["Choa Chu Kang","0459>Senja;0505>Petir|0459>Senja;0505>Petir|0518>Senja;0524>Petir","0047>Petir;0102>Senja",12]],"BP7":[["Choa Chu Kang","0506>Petir;0509>Senja|0506>Petir;0509>Senja|0525>Petir;0528>Senja","0056>Petir;0114>Senja",13]],"BP9":[["Choa Chu Kang","0506>Senja;0509>Petir|0506>Senja;0509>Petir|0525>Senja;0527>Petir","0059>Petir;0111>Senja",13]]};
-const TT_DATE = "11 Nov 2026";
-
 // ---------- Projection ----------
 const W = 920, H = 520, PAD = 28;
 const LON0 = 103.590, LON1 = 104.045, LAT0 = 1.228, LAT1 = 1.478;
@@ -523,95 +411,25 @@ const el = (tag, attrs, parent) => {
   return n;
 };
 const landD = LAND.map(poly => "M" + poly.map(p => proj(p[0], p[1]).map(n => n.toFixed(1)).join(",")).join("L") + "Z").join("");
-// Geography (land, rail lines) sits in `world` and scales with the zoom.
-// Markers and labels are placed at their zoomed position but keep the same size on screen.
-const world = el("g", {}, svg);
-const landPath = el("path", { d: landD, class: "land" }, world);
-const railLines = el("g", { class: "rail" }, world);
-const seaLayer = el("g", {}, svg);
-const SEA = [[300, OY + 0.012 * K + 14, "Strait of Johor"], [470, H - PAD + 6, "Singapore Strait"]].map(([x, y, label]) => {
-  const t = el("text", { class: "sea-label" }, seaLayer);
-  t.textContent = label;
-  return { x, y, t };
-});
-const railLayer = el("g", { class: "rail" }, svg);
+const landPath = el("path", { d: landD, class: "land" }, svg);
+el("text", { x: 300, y: OY + 0.012 * K + 14, class: "sea-label" }, svg).textContent = "Strait of Johor";
+el("text", { x: 470, y: H - PAD + 6, class: "sea-label" }, svg).textContent = "Singapore Strait";
 const townLayer = el("g", {}, svg);
 const stnLayer = el("g", {}, svg);
 
-// ---------- Zoom state ----------
-const ZMIN = 1, ZMAX = 8;
-const view = { k: 1, tx: 0, ty: 0 };
-const toScreen = (x, y) => [x * view.k + view.tx, y * view.k + view.ty];
-const toWorld = (x, y) => [(x - view.tx) / view.k, (y - view.ty) / view.k];
-
 const townMarks = {};
 let stnMarks = {};
-const railMarks = {};
-const markFor = id => stnMarks[id] || townMarks[id] || railMarks[id];
+const markFor = id => stnMarks[id] || townMarks[id];
 
-// ---------- MRT / LRT layer ----------
-const LINES = {
-  NS: { name: "North-South Line", c: "#D42E12", t: "#ffffff" },
-  EW: { name: "East-West Line", c: "#009645", t: "#ffffff" },
-  CG: { name: "East-West Line", c: "#009645", t: "#ffffff" },
-  NE: { name: "North East Line", c: "#9900AA", t: "#ffffff" },
-  CC: { name: "Circle Line", c: "#FA9E0D", t: "#2b1a00" },
-  CE: { name: "Circle Line", c: "#FA9E0D", t: "#2b1a00" },
-  DT: { name: "Downtown Line", c: "#005EC4", t: "#ffffff" },
-  TE: { name: "Thomson-East Coast Line", c: "#9D5B25", t: "#ffffff" },
-  BP: { name: "Bukit Panjang LRT", c: "#748477", t: "#ffffff" },
-  SK: { name: "Sengkang LRT", c: "#748477", t: "#ffffff" },
-  PG: { name: "Punggol LRT", c: "#748477", t: "#ffffff" }
-};
-const PREFIX_LINE = { SE: "SK", SW: "SK", STC: "SK", PE: "PG", PW: "PG", PTC: "PG" };
-const lineOf = code => { const p = code.replace(/\d+$/, ""); return LINES[PREFIX_LINE[p] || p] || LINES.BP; };
-const lineKeyOf = code => { const p = code.replace(/\d+$/, ""); return PREFIX_LINE[p] || p; };
-const codePills = codes => codes.map(c => { const L = lineOf(c); return `<span class="code" style="--c:${L.c};--ct:${L.t}">${c}</span>`; }).join("");
-// Terminus names LTA uses for each direction, mapped to the lines that run there
-const DEST_LINES = { "Pasir Ris": ["EW"], "Tuas Link": ["EW"], "Changi Airport": ["CG", "EW"], "Tanah Merah": ["CG", "EW"],
-  "Jurong East": ["NS"], "Marina South Pier": ["NS"], "HarbourFront": ["NE", "CC"], "Punggol Coast": ["NE"],
-  "Bayfront": ["CC", "CE"], "Dhoby Ghaut": ["CC"], "Bukit Panjang": ["DT"], "Expo": ["DT"],
-  "Woodlands North": ["TE"], "Bayshore": ["TE"], "Choa Chu Kang": ["BP"] };
-function dirLine(r, dest) {
-  const keys = r.codes.map(lineKeyOf);
-  const k = (DEST_LINES[dest] || []).find(c => keys.includes(c)) || keys[0];
-  return LINES[k] || LINES.BP;
-}
-
-const RAIL = RAIL_STNS.map(([name, codes, x, y, id]) => ({ name, codes: codes.split(" "), x, y, id }));
-const RAIL_BY_ID = Object.fromEntries(RAIL.map(r => [r.id, r]));
-const RAIL_SORTED = [...RAIL].sort((a, b) => a.name.localeCompare(b.name));
-const LRT_KEYS = new Set(["BP", "SK", "PG"]);
-for (const [k, d] of RAIL_LINES) el("path", { d, class: "rail-case" }, railLines);
-for (const [k, d] of RAIL_LINES) el("path", { d, class: "rail-line" + (LRT_KEYS.has(k) ? " lrt" : ""), stroke: LINES[k].c }, railLines);
-// Marker groups are drawn around (0,0) and moved into place by positionMarkers()
-for (const r of RAIL) {
-  const ix = r.codes.length > 1;
-  const g = el("g", { class: "rstn" + (ix ? " ix" : "") }, railLayer);
-  el("circle", { r: 7, class: "hit" }, g);
-  el("circle", { r: 7.5, class: "ring" }, g);
-  el("circle", { r: ix ? 3.6 : 2.7, class: "dot" }, g);
-  r.label = el("text", { x: 11, y: 4, class: "rname" }, g);
-  r.label.textContent = r.name;
-  g.addEventListener("click", e => { if (e.detail < 2) select(r.id); });
-  g.addEventListener("mouseenter", () => showRail(r));
-  g.addEventListener("mouseleave", restoreReadout);
-  r.g = g;
-  railMarks[r.id] = g;
-}
-
-const townLabelAt = pos => ({
-  x: pos === "r" ? 7 : pos === "l" ? -7 : pos === "b" ? 4 : 0,
-  y: pos === "t" ? -8 : pos === "b" ? 16 : 4,
-  anchor: pos === "r" || pos === "b" ? "start" : pos === "l" ? "end" : "middle"
-});
 for (const t of TOWNS) {
   const g = el("g", { class: "town", tabindex: 0, role: "button" }, townLayer);
-  el("rect", { x: -3.5, y: -3.5, width: 7, height: 7, transform: "rotate(45)", class: "mark" }, g);
-  const lab = townLabelAt(t.pos || "r");
-  el("text", { x: lab.x, y: lab.y, "text-anchor": lab.anchor, class: "tname" }, g).textContent = t.name;
-  t.g = g;
-  g.addEventListener("click", e => { if (e.detail < 2) select(t.id); });
+  el("rect", { x: t.x - 3.5, y: t.y - 3.5, width: 7, height: 7, transform: `rotate(45 ${t.x} ${t.y})`, class: "mark" }, g);
+  const pos = t.pos || "r";
+  const lx = pos === "r" ? t.x + 7 : pos === "l" ? t.x - 7 : t.x + (pos === "b" ? 4 : 0);
+  const ly = pos === "t" ? t.y - 8 : pos === "b" ? t.y + 16 : t.y + 4;
+  const anchor = pos === "r" ? "start" : pos === "l" ? "end" : pos === "b" ? "start" : "middle";
+  el("text", { x: lx, y: ly, "text-anchor": anchor, class: "tname" }, g).textContent = t.name;
+  g.addEventListener("click", () => select(t.id));
   g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(t.id); } });
   g.addEventListener("mouseenter", () => showTown(t));
   g.addEventListener("mouseleave", restoreReadout);
@@ -638,11 +456,11 @@ function candidates(s, nameW) {
 function townRects() {
   const out = [];
   for (const t of TOWNS) {
-    const [tx, ty] = toScreen(t.x, t.y);
-    const w = t.name.length * 6.2, lab = townLabelAt(t.pos || "r");
-    const lx = tx + lab.x, ly = ty + lab.y;
-    const x = lab.anchor === "start" ? lx : lab.anchor === "end" ? lx - w : lx - w / 2;
-    out.push({ x: tx - 4, y: ty - 4, w: 8, h: 8 }, { x, y: ly - 9, w, h: 12 });
+    const pos = t.pos || "r", w = t.name.length * 6.2;
+    const lx = pos === "r" ? t.x + 7 : pos === "l" ? t.x - 7 : t.x + (pos === "b" ? 4 : 0);
+    const ly = pos === "t" ? t.y - 8 : pos === "b" ? t.y + 16 : t.y + 4;
+    const x = pos === "r" || pos === "b" ? lx : pos === "l" ? lx - w : lx - w / 2;
+    out.push({ x: t.x - 4, y: t.y - 4, w: 8, h: 8 }, { x, y: ly - 9, w, h: 12 });
   }
   return out;
 }
@@ -675,8 +493,7 @@ function placeLabels(list) {
 function renderStations() {
   stnLayer.replaceChildren();
   stnMarks = {};
-  // Lay out the weather pills in screen positions, so they stay readable at any zoom
-  const visible = STATIONS.map(s => { const [x, y] = toScreen(s.x, s.y); return { ...s, x, y }; }).filter(onMap);
+  const visible = STATIONS.filter(onMap);
   const layout = placeLabels(visible);
   svg.setAttribute("aria-label", `Map of Singapore with temperatures at ${visible.length} weather stations`);
   for (const s of visible) {
@@ -688,7 +505,7 @@ function renderStations() {
     el("text", { x: L.px + 24, y: L.py + PH / 2 + 5, class: "val" }, g).textContent = s.t.toFixed(1) + "°";
     el("circle", { cx: s.x, cy: s.y, r: 4, class: "pin" }, g);
     el("text", { x: L.nx, y: L.ny, "text-anchor": "middle", class: "name" }, g).textContent = s.short;
-    g.addEventListener("click", e => { if (e.detail < 2) select(s.id); });
+    g.addEventListener("click", () => select(s.id));
     g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(s.id); } });
     g.addEventListener("mouseenter", () => showStation(s));
     g.addEventListener("mouseleave", restoreReadout);
@@ -724,19 +541,11 @@ function renderTownLabels() {
 
 const list = document.getElementById("list");
 const listTitle = document.getElementById("listTitle");
-const tabs = { stations: document.getElementById("tab-stations"), towns: document.getElementById("tab-towns"), rail: document.getElementById("tab-rail") };
-const railPane = document.getElementById("railPane");
-const railBrowse = document.getElementById("railBrowse");
-const railCard = document.getElementById("railCard");
-const railQuery = document.getElementById("railQuery");
-const railList = document.getElementById("railList");
+const tabs = { stations: document.getElementById("tab-stations"), towns: document.getElementById("tab-towns") };
 let rows = {};
 function renderList(mode) {
   listMode = mode;
   for (const k in tabs) tabs[k].setAttribute("aria-selected", String(k === mode));
-  list.hidden = mode === "rail";
-  railPane.hidden = mode !== "rail";
-  if (mode === "rail") { renderRailPane(); return; }
   listTitle.innerHTML = mode === "stations"
     ? `Stations, warmest first <span>°C</span>`
     : `HDB towns, warmest first <span>est. °C</span>`;
@@ -751,128 +560,13 @@ function renderList(mode) {
     b.innerHTML = `<span class="row-name">${s.name}<small>${sub}</small></span>
       <span class="row-val">${mode === "towns" ? '<span class="est">≈</span>' : ""}${s.t.toFixed(1)}</span>
       <span class="row-track"><span class="row-fill" style="width:${((s.t - TMIN) / (TMAX - TMIN) * 100).toFixed(1)}%;background:${css(colour(s.t))}"></span></span>`;
-    b.addEventListener("click", () => select(s.id, { focus: true }));
+    b.addEventListener("click", () => select(s.id));
     li.appendChild(b); list.appendChild(li);
     rows[s.id] = b;
   }
 }
 tabs.stations.addEventListener("click", () => renderList("stations"));
 tabs.towns.addEventListener("click", () => renderList("towns"));
-tabs.rail.addEventListener("click", () => renderList("rail"));
-
-// ---------- MRT / LRT station list and timetable card ----------
-const DAYS = [["wd", "Mon–Fri"], ["sat", "Sat"], ["sun", "Sun & PH"]];
-let railDay = (() => {
-  const d = new Intl.DateTimeFormat("en-SG", { timeZone: "Asia/Singapore", weekday: "short" }).format(new Date());
-  return d.startsWith("Sat") ? "sat" : d.startsWith("Sun") ? "sun" : "wd";
-})();
-const forDay = (s, day) => { const p = s.split("|"); return p.length === 3 ? p[DAYS.findIndex(x => x[0] === day)] : s; };
-const trains = s => (s ? s.split(";").filter(Boolean).map(e => { const [t, to] = e.split(">"); return { t: `${t.slice(0, 2)}:${t.slice(2)}`, to: to || "" }; }) : []);
-function freqText(i, day) {
-  const f = TT_F[i];
-  if (!f) return "";
-  const [pk, off] = forDay(f, day).split("/");
-  const one = v => { const about = v.includes("*"); v = v.replace(/\*/g, "").replace(/[-–]/g, "–"); return `${about ? "about every" : "every"} ${v} min`; };
-  const out = [];
-  if (pk) out.push(`Peak: ${one(pk)}`);
-  if (off) out.push(`off-peak: ${one(off)}`);
-  return out.join(" · ").replace(/^off/, "Off");
-}
-function trainsHtml(list) { return list.map(x => `${x.t}${x.to ? ` <small>to ${x.to}</small>` : ""}`).join(", "); }
-
-function renderRailPane() {
-  const r = RAIL_BY_ID[selected];
-  railBrowse.hidden = !!r;
-  railCard.hidden = !r;
-  if (r) {
-    listTitle.innerHTML = `First and last trains <span>LTA timetable</span>`;
-    renderRailCard(r);
-  } else {
-    listTitle.innerHTML = `MRT and LRT stations <span>${RAIL.length}</span>`;
-    renderRailList();
-  }
-}
-function renderRailList() {
-  const q = railQuery.value.trim().toLowerCase();
-  const hits = RAIL_SORTED.filter(r => !q || r.name.toLowerCase().includes(q) || r.codes.some(c => c.toLowerCase().startsWith(q)));
-  railList.replaceChildren();
-  if (!hits.length) {
-    const li = document.createElement("li"), p = document.createElement("p");
-    p.className = "rempty";
-    p.textContent = `No station matches "${railQuery.value.trim()}".`;
-    li.appendChild(p); railList.appendChild(li);
-    return;
-  }
-  for (const r of hits) {
-    const li = document.createElement("li"), b = document.createElement("button");
-    b.type = "button"; b.className = "rrow";
-    b.innerHTML = `<span>${r.name}</span><span class="codes">${codePills(r.codes)}</span>`;
-    b.addEventListener("click", () => select(r.id, { focus: true }));
-    li.appendChild(b); railList.appendChild(li);
-  }
-}
-railQuery.addEventListener("input", renderRailList);
-
-function renderRailCard(r) {
-  railCard.replaceChildren();
-  const back = document.createElement("button");
-  back.type = "button"; back.className = "rback"; back.textContent = "‹ All stations";
-  back.addEventListener("click", () => select(r.id));
-  railCard.appendChild(back);
-
-  const head = document.createElement("div");
-  head.className = "rhead";
-  head.innerHTML = `<h3>${r.name}</h3><div class="codes">${codePills(r.codes)}</div>
-    <p class="rtemp">Estimated air temperature here: <strong>≈ ${idw(r.x, r.y).toFixed(1)} °C</strong></p>`;
-  railCard.appendChild(head);
-
-  const pick = document.createElement("div");
-  pick.className = "daypick"; pick.setAttribute("role", "group"); pick.setAttribute("aria-label", "Day of travel");
-  for (const [k, label] of DAYS) {
-    const b = document.createElement("button");
-    b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", String(k === railDay));
-    b.addEventListener("click", () => { railDay = k; renderRailCard(r); });
-    pick.appendChild(b);
-  }
-  railCard.appendChild(pick);
-
-  const dirs = TT[r.id];
-  if (!dirs) {
-    const p = document.createElement("p");
-    p.className = "sub";
-    p.textContent = "LTA's timetable for this station isn't in this version of the map yet.";
-    railCard.appendChild(p);
-  }
-  for (const [to, first, last, fi] of dirs || []) {
-    const L = to ? dirLine(r, to) : { c: "var(--muted)" };
-    const firsts = trains(forDay(first, railDay));
-    const lasts = trains(forDay(last, railDay));
-    const full = lasts.filter(x => !x.to), part = lasts.filter(x => x.to);
-    const sec = document.createElement("section");
-    sec.className = "dir";
-    sec.innerHTML = `<h4><span class="sw" style="--c:${L.c}"></span>${to ? `Towards ${to}` : `Direction not named on LTA's page`}</h4>
-      <dl class="times">
-        <dt>First train</dt><dd>${firsts.length ? trainsHtml(firsts) : "No service listed"}</dd>
-        <dt>Last train</dt><dd>${full.length ? trainsHtml(full) : part.length ? trainsHtml(part) : "No service listed"}</dd>
-      </dl>
-      ${full.length && part.length ? `<p class="sub">Last trains that end before the terminus: ${part.map(x => `<b>${x.t}</b> to ${x.to}`).join(" · ")}</p>` : ""}
-      ${freqText(fi, railDay) ? `<p class="sub">${freqText(fi, railDay)}</p>` : ""}`;
-    railCard.appendChild(sec);
-  }
-
-  const live = document.createElement("div");
-  live.className = "live";
-  live.innerHTML = `<h4>Live waiting times</h4>
-    <p>LTA doesn't publish live train arrival times online, so the next-train countdown is only on the platform screens at the station. LTA's MyTransport.SG app sends MRT disruption alerts.</p>
-    <a href="https://apps.apple.com/sg/app/mytransport-sg/id1306661188" target="_blank" rel="noopener">MyTransport.SG on the App Store</a>
-    <a href="https://www.lta.gov.sg/content/ltagov/en/map/train.html" target="_blank" rel="noopener">LTA's MRT and LRT map</a>`;
-  railCard.appendChild(live);
-
-  const src = document.createElement("p");
-  src.className = "rsrc";
-  src.textContent = `Timetable from LTA's station pages, collected ${TT_DATE}. Public holiday and special-event timings can differ.`;
-  railCard.appendChild(src);
-}
 
 // ---------- Readout + selection ----------
 const readout = document.getElementById("readout");
@@ -885,63 +579,39 @@ function showTown(t) {
   const near = nearestStation(t.x, t.y);
   readout.innerHTML = `${t.name} · <strong>≈ ${t.t.toFixed(1)} °C</strong> <span class="tag">estimated · ${t.units.toLocaleString("en-SG")} flats · nearest station ${near.short}</span>`;
 }
-const DEFAULT_HINT = "Hover over the island for an estimate. Double-click or use + to zoom, then drag to move.";
-if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) document.getElementById("zoomHint").textContent = "Hold ⌘ and scroll, or pinch, to zoom";
-function showRail(r) {
-  readout.innerHTML = `${r.name} · ${r.codes.join(" ")} <span class="tag">MRT/LRT station · ≈ ${idw(r.x, r.y).toFixed(1)} °C estimated here</span>`;
-}
 function restoreReadout() {
   const s = STATIONS.find(x => x.id === selected);
   const t = TOWNS.find(x => x.id === selected);
-  const r = RAIL_BY_ID[selected];
   if (s) showStation(s);
   else if (t) showTown(t);
-  else if (r) showRail(r);
-  else readout.innerHTML = `<span class="tag">${DEFAULT_HINT}</span>`;
+  else readout.innerHTML = `<span class="tag">Hover over the island for an estimate, or pick a station or town.</span>`;
 }
-function select(id, opts = {}) {
+function select(id) {
   selected = selected === id ? null : id;
   if (townMarks[selected] && svg.classList.contains("hide-towns")) {
     townsBox.checked = true;
     svg.classList.remove("hide-towns");
   }
-  if (RAIL_BY_ID[selected] && svg.classList.contains("hide-rail")) {
-    railBox.checked = true;
-    svg.classList.remove("hide-rail");
-  }
   for (const k in townMarks) townMarks[k].classList.toggle("on", k === selected);
   for (const k in stnMarks) stnMarks[k].classList.toggle("on", k === selected);
-  for (const k in railMarks) railMarks[k].classList.toggle("on", k === selected);
   for (const k in rows) rows[k].classList.toggle("on", k === selected);
   const m = markFor(selected);
   if (m) m.parentNode.appendChild(m);
-  if (RAIL_BY_ID[selected]) renderList("rail");
-  else if (listMode === "rail") renderRailPane();
   restoreReadout();
-  // Picking from a list brings that place into view (zooming in on MRT/LRT stations)
-  const p = RAIL_BY_ID[selected] || TOWNS.find(t => t.id === selected) || STATIONS.find(s => s.id === selected);
-  if (p && opts.focus) {
-    const [sx, sy] = toScreen(p.x, p.y);
-    const k = RAIL_BY_ID[selected] ? Math.max(view.k, 3) : view.k;
-    if (k !== view.k || sx < 40 || sx > W - 40 || sy < 40 || sy > H - 40) zoomTo(p.x, p.y, k);
-  }
 }
-const railBox = document.getElementById("rail");
-railBox.addEventListener("change", () => svg.classList.toggle("hide-rail", !railBox.checked));
 townsBox.addEventListener("change", () => {
   svg.classList.toggle("hide-towns", !townsBox.checked);
   renderStations();   // station labels re-arrange around town labels only while towns are shown
 });
 
 svg.addEventListener("mousemove", e => {
-  if (gesture || e.target.closest(".stn, .town, .rstn")) return;
-  const [vx, vy] = svgPoint(e);
-  const [x, y] = toWorld(vx, vy);
+  if (e.target.closest(".stn, .town")) return;
+  const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse());
   let isLand = false;
-  try { isLand = landPath.isPointInFill(new DOMPoint(x, y)); } catch (_) {}
+  try { isLand = landPath.isPointInFill(new DOMPoint(pt.x, pt.y)); } catch (_) {}
   if (!isLand) { restoreReadout(); return; }
-  const near = nearestStation(x, y);
-  readout.innerHTML = `Estimated <strong>${idw(x, y).toFixed(1)} °C</strong> <span class="tag">here · nearest station ${near.short} ${near.t.toFixed(1)}°</span>`;
+  const near = nearestStation(pt.x, pt.y);
+  readout.innerHTML = `Estimated <strong>${idw(pt.x, pt.y).toFixed(1)} °C</strong> <span class="tag">here · nearest station ${near.short} ${near.t.toFixed(1)}°</span>`;
 });
 svg.addEventListener("mouseleave", restoreReadout);
 
@@ -949,215 +619,29 @@ svg.addEventListener("mouseleave", restoreReadout);
 const canvas = document.getElementById("heat");
 const stage = document.getElementById("stage");
 const surfaceBox = document.getElementById("surface");
-// The surface is worked out as one small image (one pixel per on-screen cell), then scaled up
-// smoothly and clipped to the coastline in a single drawImage. This is much faster than filling
-// each cell as its own rectangle.
-// coarse = true uses bigger cells while the map is moving.
-const heatBuf = document.createElement("canvas");
-const heatCtx = heatBuf.getContext("2d");
-const LUT_N = 256;
-function colourLut() {
-  const lut = new Uint8ClampedArray(LUT_N * 3);
-  for (let i = 0; i < LUT_N; i++) lut.set(colour(TMIN + (TMAX - TMIN) * i / (LUT_N - 1)), i * 3);
-  return lut;
-}
-function draw(coarse = false) {
+function draw() {
   const r = stage.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
-  const cw = Math.round(r.width * dpr), ch = Math.round(r.height * dpr);
-  if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+  canvas.width = Math.round(r.width * dpr);
+  canvas.height = Math.round(r.height * dpr);
   const ctx = canvas.getContext("2d");
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   landPath.classList.toggle("flat", !surfaceBox.checked);
   if (!surfaceBox.checked || !STATIONS.length) return;
-
-  const cell = coarse === true ? 6 : 2;                  // cell size in screen units (920×520 viewBox)
-  const gw = Math.ceil(W / cell) + 1, gh = Math.ceil(H / cell) + 1;
-  if (heatBuf.width !== gw || heatBuf.height !== gh) { heatBuf.width = gw; heatBuf.height = gh; }
-  const img = heatCtx.createImageData(gw, gh), px = img.data;
-  const n = STATIONS.length;
-  const sx = Float64Array.from(STATIONS, s => s.x), sy = Float64Array.from(STATIONS, s => s.y), st = Float64Array.from(STATIONS, s => s.t);
-  const lut = colourLut(), lutScale = (LUT_N - 1) / (TMAX - TMIN);
-  const step = cell / view.k;                             // cell size in map units
-  const wx0 = (cell / 2 - view.tx) / view.k, wy0 = (cell / 2 - view.ty) / view.k;
-  let i = 0;
-  for (let gy = 0; gy < gh; gy++) {
-    const y = wy0 + gy * step;
-    for (let gx = 0; gx < gw; gx++, i += 4) {
-      const x = wx0 + gx * step;
-      let num = 0, den = 0, t = NaN;
-      for (let k = 0; k < n; k++) {                       // inverse-distance weighting, as in idw()
-        const dx = x - sx[k], dy = y - sy[k], d2 = dx * dx + dy * dy;
-        if (d2 < 1) { t = st[k]; break; }
-        const w = 1 / d2;
-        num += w * st[k]; den += w;
-      }
-      if (t !== t) t = num / den;
-      const j = Math.max(0, Math.min(LUT_N - 1, Math.round((t - TMIN) * lutScale))) * 3;
-      px[i] = lut[j]; px[i + 1] = lut[j + 1]; px[i + 2] = lut[j + 2]; px[i + 3] = 255;
-    }
-  }
-  heatCtx.putImageData(img, 0, 0);
-
   ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
   ctx.save();
-  ctx.transform(view.k, 0, 0, view.k, view.tx, view.ty);
   ctx.clip(new Path2D(landD));
-  ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(heatBuf, 0, 0, gw * cell, gh * cell);
+  const step = 3;
+  for (let y = OY - step; y < H; y += step) {
+    for (let x = 0; x < W; x += step) {
+      ctx.fillStyle = css(colour(idw(x + step / 2, y + step / 2)));
+      ctx.fillRect(x, y, step + 0.5, step + 0.5);
+    }
+  }
   ctx.restore();
 }
-let drawFrame = 0, fineTimer = 0;
-function scheduleDraw(coarse) {
-  cancelAnimationFrame(drawFrame);
-  clearTimeout(fineTimer);
-  drawFrame = requestAnimationFrame(() => draw(coarse));
-  if (coarse) fineTimer = setTimeout(() => draw(false), 160);
-}
-surfaceBox.addEventListener("change", () => draw());
-new ResizeObserver(() => draw()).observe(stage);
-
-// ---------- Zoom and pan ----------
-const zoomIn = document.getElementById("zoomIn");
-const zoomOut = document.getElementById("zoomOut");
-const zoomReset = document.getElementById("zoomReset");
-const zoomHint = document.getElementById("zoomHint");
-function svgPoint(e) {
-  const b = svg.getBoundingClientRect();
-  return [(e.clientX - b.left) * W / b.width, (e.clientY - b.top) * H / b.height];
-}
-function clampView(v) {
-  const k = clamp(v.k, ZMIN, ZMAX);
-  return { k, tx: clamp(v.tx, W - W * k, 0), ty: clamp(v.ty, H - H * k, 0) };
-}
-function positionMarkers() {
-  world.setAttribute("transform", `translate(${view.tx.toFixed(2)} ${view.ty.toFixed(2)}) scale(${view.k.toFixed(4)})`);
-  for (const r of RAIL) {
-    const [x, y] = toScreen(r.x, r.y);
-    r.g.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-    const right = x < W - 150;
-    r.label.setAttribute("x", right ? 11 : -11);
-    r.label.setAttribute("text-anchor", right ? "start" : "end");
-  }
-  for (const t of TOWNS) {
-    const [x, y] = toScreen(t.x, t.y);
-    t.g.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-  }
-  for (const s of SEA) {
-    const [x, y] = toScreen(s.x, s.y);
-    s.t.setAttribute("x", x.toFixed(1));
-    s.t.setAttribute("y", y.toFixed(1));
-  }
-  svg.classList.toggle("names", view.k >= 2.5);   // name every MRT/LRT station once there's room
-  stage.classList.toggle("zoomed", view.k > 1.001);
-  zoomIn.disabled = view.k >= ZMAX - 0.001;
-  zoomOut.disabled = zoomReset.disabled = view.k <= ZMIN + 0.001;
-}
-function setView(v, moving) {
-  Object.assign(view, clampView(v));
-  positionMarkers();
-  renderStations();
-  scheduleDraw(moving);
-}
-let anim = 0;
-function animateTo(v) {
-  cancelAnimationFrame(anim);
-  const from = { ...view }, to = clampView(v);
-  const ms = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 240;
-  const t0 = performance.now();
-  const tick = now => {
-    const p = ms ? Math.min(1, (now - t0) / ms) : 1, e = 1 - (1 - p) ** 3;
-    setView({ k: from.k * (to.k / from.k) ** e, tx: from.tx + (to.tx - from.tx) * e, ty: from.ty + (to.ty - from.ty) * e }, p < 1);
-    if (p < 1) anim = requestAnimationFrame(tick);
-  };
-  anim = requestAnimationFrame(tick);
-}
-// Zoom by `factor`, keeping the map point under (sx, sy) fixed on screen
-function zoomAt(sx, sy, factor, animated) {
-  const k = clamp(view.k * factor, ZMIN, ZMAX);
-  const [wx, wy] = toWorld(sx, sy);
-  const v = { k, tx: sx - wx * k, ty: sy - wy * k };
-  animated ? animateTo(v) : setView(v, true);
-}
-// Centre the map on a point at zoom k
-function zoomTo(x, y, k) { animateTo({ k, tx: W / 2 - x * k, ty: H / 2 - y * k }); }
-
-zoomIn.addEventListener("click", () => zoomAt(W / 2, H / 2, 2, true));
-zoomOut.addEventListener("click", () => zoomAt(W / 2, H / 2, 0.5, true));
-zoomReset.addEventListener("click", () => animateTo({ k: 1, tx: 0, ty: 0 }));
-svg.addEventListener("dblclick", e => {
-  const [x, y] = svgPoint(e);
-  zoomAt(x, y, e.shiftKey ? 0.5 : 2, true);
-});
-let hintTimer = 0;
-svg.addEventListener("wheel", e => {
-  if (!(e.ctrlKey || e.metaKey)) {   // plain scrolling keeps scrolling the page
-    zoomHint.hidden = false;
-    clearTimeout(hintTimer);
-    hintTimer = setTimeout(() => { zoomHint.hidden = true; }, 1400);
-    return;
-  }
-  e.preventDefault();
-  zoomHint.hidden = true;
-  const [x, y] = svgPoint(e);
-  const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
-  zoomAt(x, y, Math.exp(-dy * 0.004), false);
-}, { passive: false });
-
-// Drag to pan, two fingers to pinch. A drag of more than a few pixels doesn't count as a click.
-const pointers = new Map();
-let gesture = null, swallowClick = false;
-svg.addEventListener("pointerdown", e => {
-  if (e.pointerType === "mouse" && e.button !== 0) return;
-  pointers.set(e.pointerId, svgPoint(e));
-  cancelAnimationFrame(anim);
-  if (pointers.size === 2) {
-    const [a, b] = [...pointers.values()];
-    const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-    gesture = { type: "pinch", d0: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, k0: view.k, w0: toWorld(...mid), moved: true };
-  } else if (pointers.size === 1) {
-    gesture = { type: "pan", start: pointers.get(e.pointerId), tx: view.tx, ty: view.ty, moved: false, id: e.pointerId };
-  }
-});
-svg.addEventListener("pointermove", e => {
-  if (!gesture || !pointers.has(e.pointerId)) return;
-  pointers.set(e.pointerId, svgPoint(e));
-  if (gesture.type === "pinch" && pointers.size >= 2) {
-    const [a, b] = [...pointers.values()];
-    const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-    const k = clamp(gesture.k0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / gesture.d0, ZMIN, ZMAX);
-    setView({ k, tx: mid[0] - gesture.w0[0] * k, ty: mid[1] - gesture.w0[1] * k }, true);
-  } else if (gesture.type === "pan" && view.k > 1.001) {
-    const p = pointers.get(e.pointerId);
-    const dx = p[0] - gesture.start[0], dy = p[1] - gesture.start[1];
-    if (!gesture.moved && Math.hypot(dx, dy) < 5) return;
-    if (!gesture.moved) { gesture.moved = true; svg.setPointerCapture(e.pointerId); stage.classList.add("dragging"); }
-    setView({ k: view.k, tx: gesture.tx + dx, ty: gesture.ty + dy }, true);
-  }
-});
-function endPointer(e) {
-  if (!pointers.has(e.pointerId)) return;
-  pointers.delete(e.pointerId);
-  if (gesture && gesture.moved) swallowClick = true;
-  if (pointers.size === 0) {
-    if (gesture && gesture.moved) scheduleDraw(false);
-    gesture = null;
-    stage.classList.remove("dragging");
-  } else if (gesture && gesture.type === "pinch") {
-    const [id, p] = [...pointers.entries()][0];   // one finger left: carry on as a pan
-    gesture = { type: "pan", start: p, tx: view.tx, ty: view.ty, moved: true, id };
-  }
-}
-svg.addEventListener("pointerup", endPointer);
-svg.addEventListener("pointercancel", endPointer);
-svg.addEventListener("click", e => {
-  if (swallowClick) { e.stopPropagation(); e.preventDefault(); swallowClick = false; }
-}, true);
-svg.addEventListener("pointerdown", () => { swallowClick = false; }, true);
-positionMarkers();
+surfaceBox.addEventListener("change", draw);
+new ResizeObserver(draw).observe(stage);
 
 // ---------- Apply a set of readings to the whole page ----------
 function applyData(readings, time, source) {
@@ -1171,7 +655,7 @@ function applyData(readings, time, source) {
   TOWNS.forEach(t => { t.t = idw(t.x, t.y); });
   sorted = [...STATIONS].sort((a, b) => b.t - a.t);
   sortedTowns = [...TOWNS].sort((a, b) => b.t - a.t);
-  if (selected && !STATIONS.some(s => s.id === selected) && !townMarks[selected] && !RAIL_BY_ID[selected]) selected = null;
+  if (selected && !STATIONS.some(s => s.id === selected) && !townMarks[selected]) selected = null;
   renderStamp();
   renderStats();
   renderLegend();
